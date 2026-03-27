@@ -9,7 +9,7 @@ class SignatureFieldModel {
   final double width;
   final double height;
   final bool isRequired;
-  final String? value;
+  final dynamic value; // Can be String or Uint8List
 
   SignatureFieldModel({
     required this.fieldId,
@@ -61,7 +61,7 @@ class SignatureFieldModel {
     double? width,
     double? height,
     bool? isRequired,
-    String? value,
+    dynamic value,
   }) {
     return SignatureFieldModel(
       fieldId: fieldId,

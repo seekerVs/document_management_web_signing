@@ -1,79 +1,65 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../../../../../Utils/Constant/colors.dart';
 
 class SuccessModal extends StatelessWidget {
-  final String email;
-
-  const SuccessModal({super.key, required this.email});
+  const SuccessModal({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      backgroundColor: Colors.transparent,
+      elevation: 0,
       child: Container(
-        width: 450,
-        padding: const EdgeInsets.all(32),
+        width: 450.w,
+        padding: EdgeInsets.zero,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: AppColors.borderLight, width: 2),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Log in to Scrivener',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                IconButton(
-                  onPressed: () => Get.back(),
-                  icon: const Icon(Icons.close),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
             Container(
-              padding: const EdgeInsets.all(16),
-              color: Colors.grey.shade100,
-              child: const Text(
-                'A copy of this document has been saved to your Scrivener account. Please log in to view it.',
-                style: TextStyle(fontSize: 14),
+              color: AppColors.borderLight,
+              height: 8.h,
+            ), // Top accent bar
+            Padding(
+              padding: EdgeInsets.all(32.w),
+              child: Text(
+                'Your PDF is being generated. If you have your browser set to save PDF files, you may close this window after the file has downloaded.',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: AppColors.textSecondary,
+                  height: 1.5,
+                ),
               ),
             ),
-            const SizedBox(height: 24),
-            const Text(
-              'Email',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-            ),
-            const SizedBox(height: 4),
-            Text(email, style: const TextStyle(color: AppColors.textSecondary)),
-            const SizedBox(height: 32),
-            Row(
-              children: [
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 16,
+            Padding(
+              padding: EdgeInsets.only(right: 24.w, bottom: 24.h),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => Get.back(),
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 24.w,
+                      vertical: 16.h,
                     ),
-                    backgroundColor: AppColors.primary,
                   ),
-                  child: const Text('LOG IN'),
-                ),
-                const SizedBox(width: 24),
-                TextButton(
-                  onPressed: () => Get.offAllNamed('/'),
-                  child: const Text(
-                    'NO THANKS',
+                  child: Text(
+                    'CLOSE',
                     style: TextStyle(
-                      color: Colors.black,
+                      color: AppColors.navy,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.bold,
-                      letterSpacing: 1.1,
+                      letterSpacing: 0.5,
                     ),
                   ),
                 ),
-              ],
+              ),
             ),
           ],
         ),

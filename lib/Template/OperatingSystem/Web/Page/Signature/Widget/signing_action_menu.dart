@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../../../Utils/Constant/colors.dart';
 
 class SigningActionMenu extends StatelessWidget {
   final VoidCallback onChange;
@@ -65,7 +66,7 @@ class SigningActionMenu extends StatelessWidget {
   }
 }
 
-class _ActionItem extends StatelessWidget {
+class _ActionItem extends StatefulWidget {
   final String label;
   final VoidCallback onTap;
   final bool isDestructive;
@@ -79,19 +80,38 @@ class _ActionItem extends StatelessWidget {
   });
 
   @override
+  State<_ActionItem> createState() => _ActionItemState();
+}
+
+class _ActionItemState extends State<_ActionItem> {
+  bool _isHovering = false;
+
+  @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 20),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
-              color: isDestructive ? Colors.red : Colors.black,
-              fontSize: 18,
-              fontWeight: isBold || isDestructive ? FontWeight.bold : FontWeight.w500,
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovering = true),
+      onExit: (_) => setState(() => _isHovering = false),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          curve: Curves.easeInOut,
+          color: _isHovering ? AppColors.primary.withOpacity(0.04) : Colors.transparent,
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          child: Center(
+            child: AnimatedScale(
+              scale: _isHovering ? 1.05 : 1.0,
+              duration: const Duration(milliseconds: 150),
+              child: Text(
+                widget.label,
+                style: TextStyle(
+                  color: widget.isDestructive ? Colors.red : AppColors.textPrimary,
+                  fontSize: 18,
+                  fontWeight: widget.isBold || widget.isDestructive ? FontWeight.bold : FontWeight.w500,
+                ),
+              ),
             ),
           ),
         ),

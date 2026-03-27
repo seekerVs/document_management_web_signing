@@ -3,6 +3,7 @@ enum SignatureFieldType {
   initials,
   textbox,
   dateSigned,
+  checkbox,
 }
 
 enum SignerRole {
