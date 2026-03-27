@@ -32,6 +32,8 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.8
+  flutter_web_plugins:
+    sdk: flutter
   get: ^4.7.3
   pdfx: ^2.9.2
   signature: ^6.3.0
