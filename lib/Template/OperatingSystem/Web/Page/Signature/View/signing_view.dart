@@ -48,12 +48,20 @@ class SigningView extends GetView<SigningController> {
           end: Alignment.bottomRight,
         ),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 8, offset: Offset(0, 2)),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
         ],
       ),
       child: Row(
         children: [
-          Icon(Icons.description, color: Colors.white, size: isMobile ? 20 : 24),
+          Icon(
+            Icons.description,
+            color: Colors.white,
+            size: isMobile ? 20 : 24,
+          ),
           SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -68,14 +76,16 @@ class SigningView extends GetView<SigningController> {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                Obx(() => Text(
-                  '${controller.fields.where((f) => f.value != null).length} of ${controller.fields.length} fields completed',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
+                Obx(
+                  () => Text(
+                    '${controller.fields.where((f) => f.value != null).length} of ${controller.fields.length} fields completed',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                )),
+                ),
               ],
             ),
           ),
@@ -86,29 +96,39 @@ class SigningView extends GetView<SigningController> {
   }
 
   Widget _buildHeaderActions(BuildContext context) {
-    final bool allDone = controller.fields.isNotEmpty && controller.fields.every((f) => f.value != null);
+    final bool allDone =
+        controller.fields.isNotEmpty &&
+        controller.fields.every((f) => f.value != null);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Obx(() => ElevatedButton(
-          onPressed: allDone ? controller.finishSigning : null,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.white,
-            foregroundColor: AppColors.navy,
-            disabledBackgroundColor: Colors.white24,
-            disabledForegroundColor: Colors.white38,
-            elevation: 0,
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+        Obx(
+          () => ElevatedButton(
+            onPressed: allDone ? controller.finishSigning : null,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: AppColors.navy,
+              disabledBackgroundColor: Colors.white24,
+              disabledForegroundColor: Colors.white38,
+              elevation: 0,
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+            child: Text(
+              'FINISH',
+              style: TextStyle(
+                fontWeight: FontWeight.w800,
+                fontSize: 13,
+                letterSpacing: 1,
+              ),
+            ),
           ),
-          child: Text(
-            'FINISH',
-            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13, letterSpacing: 1),
-          ),
-        )),
+        ),
         SizedBox(width: 8),
         IconButton(
-          onPressed: () {}, 
+          onPressed: () {},
           icon: Icon(Icons.more_vert, color: Colors.white),
           tooltip: 'Other Actions',
         ),
@@ -162,9 +182,7 @@ class SigningView extends GetView<SigningController> {
               bottom: 40,
               left: 0,
               right: 0,
-              child: Center(
-                child: _buildGuidanceButton(),
-              ),
+              child: Center(child: _buildGuidanceButton()),
             ),
           ],
         );
@@ -252,7 +270,6 @@ class SigningView extends GetView<SigningController> {
       );
     });
   }
-
 
   Widget _buildErrorState() {
     return Center(
@@ -440,18 +457,24 @@ class SigningView extends GetView<SigningController> {
   }
 
   Widget _buildGuidanceButton() {
-    final bool allDone = controller.fields.isNotEmpty && controller.fields.every((f) => f.value != null);
-    
+    final bool allDone =
+        controller.fields.isNotEmpty &&
+        controller.fields.every((f) => f.value != null);
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       child: ElevatedButton(
-        onPressed: allDone ? controller.finishSigning : controller.scrollToNextField,
+        onPressed: allDone
+            ? controller.finishSigning
+            : controller.scrollToNextField,
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.navy,
           foregroundColor: Colors.white,
           elevation: 8,
           padding: EdgeInsets.symmetric(horizontal: 32, vertical: 20),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(50),
+          ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -477,10 +500,7 @@ class _PdfPageWebWidget extends StatefulWidget {
   final int pageIndex;
   final SigningController controller;
 
-  const _PdfPageWebWidget({
-    required this.pageIndex,
-    required this.controller,
-  });
+  const _PdfPageWebWidget({required this.pageIndex, required this.controller});
 
   @override
   State<_PdfPageWebWidget> createState() => _PdfPageWebWidgetState();
@@ -498,7 +518,7 @@ class _PdfPageWebWidgetState extends State<_PdfPageWebWidget> {
 
   Future<void> _renderPage() async {
     if (widget.controller.pdfDocument == null) return;
-    
+
     final page = await widget.controller.pdfDocument!.getPage(widget.pageIndex);
     // Render at a high resolution for web clarity
     final pageImage = await page.render(
@@ -506,7 +526,7 @@ class _PdfPageWebWidgetState extends State<_PdfPageWebWidget> {
       height: page.height * 2,
       format: PdfPageImageFormat.png,
     );
-    
+
     if (mounted) {
       setState(() {
         _imageBytes = pageImage?.bytes;
@@ -530,7 +550,8 @@ class _PdfPageWebWidgetState extends State<_PdfPageWebWidget> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final double displayW = constraints.maxWidth;
-        final double displayH = displayW * (_pageSize!.height / _pageSize!.width);
+        final double displayH =
+            displayW * (_pageSize!.height / _pageSize!.width);
         final double scale = displayW / _pageSize!.width;
 
         return Center(
@@ -541,7 +562,11 @@ class _PdfPageWebWidgetState extends State<_PdfPageWebWidget> {
             decoration: BoxDecoration(
               color: Colors.white,
               boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: Offset(0, 4)),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
               ],
             ),
             child: Obx(() {
@@ -551,7 +576,9 @@ class _PdfPageWebWidgetState extends State<_PdfPageWebWidget> {
 
               return Stack(
                 children: [
-                  Positioned.fill(child: Image.memory(_imageBytes!, fit: BoxFit.fill)),
+                  Positioned.fill(
+                    child: Image.memory(_imageBytes!, fit: BoxFit.fill),
+                  ),
                   ...pageFields.map(
                     (field) => SignatureFieldGuestOverlay(
                       field: field,
