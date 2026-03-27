@@ -22,7 +22,12 @@ class DocumentProvider {
       final Map<String, dynamic> data = json.decode(response.body);
       return SignatureRequestModel.fromMap(data['data'], data['id']);
     } else {
-      throw Exception('Failed to load signature request: ${response.statusCode}');
+      String message = 'Failed to load signature request: ${response.statusCode}';
+      try {
+        final Map<String, dynamic> errorData = json.decode(response.body);
+        message = errorData['message'] ?? message;
+      } catch (_) {}
+      throw Exception(message);
     }
   }
 
@@ -38,7 +43,12 @@ class DocumentProvider {
     if (response.statusCode == 200) {
       return response.bodyBytes;
     } else {
-      throw Exception('Failed to load document bytes: ${response.statusCode}');
+      String message = 'Failed to load document bytes: ${response.statusCode}';
+      try {
+        final Map<String, dynamic> errorData = json.decode(response.body);
+        message = errorData['message'] ?? message;
+      } catch (_) {}
+      throw Exception(message);
     }
   }
 
