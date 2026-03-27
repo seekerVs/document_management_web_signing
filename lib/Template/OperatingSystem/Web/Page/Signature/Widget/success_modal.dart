@@ -12,53 +12,59 @@ class SuccessModal extends StatelessWidget {
       backgroundColor: Colors.transparent,
       elevation: 0,
       child: Container(
-        width: 450.w,
-        padding: EdgeInsets.zero,
+        width: 400,
+        padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border.all(color: AppColors.borderLight, width: 2),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 30, offset: const Offset(0, 10)),
+          ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              color: AppColors.borderLight,
-              height: 8.h,
-            ), // Top accent bar
-            Padding(
-              padding: EdgeInsets.all(32.w),
-              child: Text(
-                'Your PDF is being generated. If you have your browser set to save PDF files, you may close this window after the file has downloaded.',
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  color: AppColors.textSecondary,
-                  height: 1.5,
-                ),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.navy.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.check_circle, color: AppColors.navy, size: 48),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Signing Completed!',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: AppColors.textPrimary,
+                letterSpacing: -0.5,
               ),
             ),
-            Padding(
-              padding: EdgeInsets.only(right: 24.w, bottom: 24.h),
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () => Get.back(),
-                  style: TextButton.styleFrom(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 24.w,
-                      vertical: 16.h,
-                    ),
-                  ),
-                  child: Text(
-                    'CLOSE',
-                    style: TextStyle(
-                      color: AppColors.navy,
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ),
+            const SizedBox(height: 12),
+            Text(
+              'Your document has been successfully signed and processed. You can now close this window.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: AppColors.textSecondary,
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 32),
+            ElevatedButton(
+              onPressed: () => Get.back(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.navy,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                elevation: 0,
+              ),
+              child: const Text(
+                'CLOSE WINDOW',
+                style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 1),
               ),
             ),
           ],

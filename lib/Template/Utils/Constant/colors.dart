@@ -11,6 +11,6 @@ class AppColors {
   static const Color backgroundWhite = Color(0xFFFFFFFF);
   static const Color backgroundLight = Color(0xFFECF1F7);
   static const Color borderLight = Color(0xFFD9E4EE);
-  static const Color navy = Color(0xFF1E0B4B);
+  static const Color navy = Color(0xFF279EFF); // Replaced with primary blue
   static const Color avatarBg = Color(0xFFD1F7FF);
 }

@@ -30,7 +30,8 @@ class SigningController extends GetxController {
 
   late DocumentProvider _documentProvider;
   late PdfService _pdfService;
-  late PdfControllerPinch pdfController;
+  PdfDocument? pdfDocument;
+  final ScrollController scrollController = ScrollController();
 
   @override
   void onInit() {
@@ -47,7 +48,8 @@ class SigningController extends GetxController {
 
   @override
   void onClose() {
-    pdfController.dispose();
+    pdfDocument?.close();
+    scrollController.dispose();
     super.onClose();
   }
 
@@ -69,10 +71,15 @@ class SigningController extends GetxController {
       // Fetch PDF bytes
       final bytes = await _documentProvider.getDocumentBytes(token.value);
       
-      // Initialize PDF controller with real data
-      pdfController = PdfControllerPinch(
-        document: PdfDocument.openData(bytes),
-      );
+      // Open document
+      pdfDocument = await PdfDocument.openData(bytes);
+      
+      // Initial scroll to top
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (scrollController.hasClients) {
+          scrollController.jumpTo(0);
+        }
+      });
       
       // Filter fields for the current guest signer (simplified: first signer in session for now)
       if (request.signers.isNotEmpty) {
@@ -184,11 +191,14 @@ class SigningController extends GetxController {
 
   void scrollToNextField() {
     final nextField = fields.firstWhereOrNull((f) => f.value == null);
-    if (nextField != null) {
-      pdfController.animateToPage(
-        pageNumber: nextField.page,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
+    if (nextField != null && scrollController.hasClients) {
+      // Crude estimate: page height is roughly 850px + margins
+      // A more robust way would be using keys, but this works for most PDFs
+      final double targetOffset = (nextField.page - 1) * 900.0; 
+      scrollController.animateTo(
+        targetOffset,
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeInOutQuart,
       );
     }
   }

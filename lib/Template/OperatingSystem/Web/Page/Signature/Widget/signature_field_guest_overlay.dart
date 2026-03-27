@@ -32,14 +32,16 @@ class SignatureFieldGuestOverlay extends StatelessWidget {
               width: field.width * scale,
               height: field.height * scale,
               decoration: BoxDecoration(
-                color: field.value == null ? (field.type == SignatureFieldType.checkbox ? Colors.transparent : AppColors.navy) : Colors.transparent,
+                color: field.value == null 
+                  ? (field.type == SignatureFieldType.checkbox ? Colors.transparent : AppColors.navy.withOpacity(0.08)) 
+                  : Colors.transparent,
                 border: Border.all(
                   color: field.value == null 
-                    ? (field.type == SignatureFieldType.checkbox ? AppColors.navy : Colors.white) 
+                    ? (field.type == SignatureFieldType.checkbox ? AppColors.navy : AppColors.navy.withOpacity(0.4)) 
                     : (field.type == SignatureFieldType.checkbox ? AppColors.navy : Colors.transparent),
-                  width: field.type == SignatureFieldType.checkbox ? 2 : 2,
+                  width: 1.5,
                 ),
-                borderRadius: BorderRadius.circular(field.type == SignatureFieldType.checkbox ? 2.r : 4.r),
+                borderRadius: BorderRadius.circular(field.type == SignatureFieldType.checkbox ? 4.r : 6.r),
               ),
               child: _buildFieldContent(scale),
             ),
@@ -91,15 +93,25 @@ class SignatureFieldGuestOverlay extends StatelessWidget {
     switch (field.type) {
       case SignatureFieldType.signature:
       case SignatureFieldType.initials:
-        return Row(
+        return Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.edit, color: Colors.white, size: 14.sp * scale),
-            SizedBox(width: 4.w * scale),
-            Text(
-              field.type == SignatureFieldType.signature ? 'Sign' : 'Initial',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13.sp * scale),
+            Icon(
+              field.type == SignatureFieldType.signature ? Icons.draw : Icons.gesture, 
+              color: AppColors.navy, 
+              size: (18.sp * scale).clamp(16, 24)
             ),
+            if (scale > 0.5) ...[
+              SizedBox(height: 2.h * scale),
+              Text(
+                field.type == SignatureFieldType.signature ? 'Sign' : 'Initial',
+                style: TextStyle(
+                  color: AppColors.navy, 
+                  fontWeight: FontWeight.w600, 
+                  fontSize: (11.sp * scale).clamp(10, 14)
+                ),
+              ),
+            ],
           ],
         );
       case SignatureFieldType.checkbox:
@@ -126,28 +138,36 @@ class SignatureFieldGuestOverlay extends StatelessWidget {
   }
 
   Widget _buildTooltip(double scale) {
-    String label = 'Required - ';
+    String label = '';
     switch (field.type) {
-      case SignatureFieldType.signature: label += 'Sign Here'; break;
-      case SignatureFieldType.initials: label += 'Initial Here'; break;
-      case SignatureFieldType.textbox: label += 'Type Here'; break;
-      case SignatureFieldType.dateSigned: label += 'Insert Date'; break;
-      case SignatureFieldType.checkbox: label += 'Check'; break;
+      case SignatureFieldType.signature: label = 'Sign Here'; break;
+      case SignatureFieldType.initials: label = 'Initial Here'; break;
+      case SignatureFieldType.textbox: label = 'Type Here'; break;
+      case SignatureFieldType.dateSigned: label = 'Insert Date'; break;
+      case SignatureFieldType.checkbox: label = 'Check'; break;
     }
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 6.w * scale, vertical: 2.h * scale),
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: AppColors.borderLight),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 2, offset: Offset(0, 1))],
+        color: AppColors.navy,
+        borderRadius: BorderRadius.circular(4),
+        boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))],
       ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: AppColors.textSecondary,
-          fontSize: 10.sp * scale.clamp(0.6, 1.0),
-          fontWeight: FontWeight.w500,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.arrow_drop_down_circle_outlined, color: Colors.white, size: (12.sp * scale).clamp(10, 14)),
+          SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: (10.sp * scale).clamp(9, 13),
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
       ),
     );
   }

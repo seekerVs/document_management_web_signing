@@ -38,25 +38,46 @@ class SigningView extends GetView<SigningController> {
   Widget _buildHeader(BuildContext context) {
     final bool isMobile = context.width <= 900;
     return Container(
-      height: isMobile ? 56.h : 64.h,
-      padding: EdgeInsets.symmetric(horizontal: isMobile ? 12.w : 24.w),
-      decoration: const BoxDecoration(
-        color: AppColors.navy,
+      height: isMobile ? 56 : 64,
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppColors.navy, AppColors.navy.withOpacity(0.85)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         boxShadow: [
-          BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
+          BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 8, offset: Offset(0, 2)),
         ],
       ),
       child: Row(
         children: [
-          Text(
-            'Review and complete',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: isMobile ? 16.sp : 20.sp,
-              fontWeight: FontWeight.w700,
+          Icon(Icons.description, color: Colors.white, size: isMobile ? 20 : 24),
+          SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Review and complete',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: isMobile ? 15 : 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Obx(() => Text(
+                  '${controller.fields.where((f) => f.value != null).length} of ${controller.fields.length} fields completed',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                  ),
+                )),
+              ],
             ),
           ),
-          const Spacer(),
           _buildHeaderActions(context),
         ],
       ),
@@ -64,76 +85,31 @@ class SigningView extends GetView<SigningController> {
   }
 
   Widget _buildHeaderActions(BuildContext context) {
+    final bool allDone = controller.fields.isNotEmpty && controller.fields.every((f) => f.value != null);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          height: 36.h,
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.white.withOpacity(0.5)),
-            borderRadius: BorderRadius.circular(4.r),
+        Obx(() => ElevatedButton(
+          onPressed: allDone ? controller.finishSigning : null,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.white,
+            foregroundColor: AppColors.navy,
+            disabledBackgroundColor: Colors.white24,
+            disabledForegroundColor: Colors.white38,
+            elevation: 0,
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              InkWell(
-                onTap: controller.finishSigning,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24.w),
-                  child: Center(
-                    child: Text(
-                      'Finish',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              Container(width: 1, color: Colors.white.withOpacity(0.5)),
-              PopupMenuButton<String>(
-                icon: Icon(
-                  Icons.keyboard_arrow_down,
-                  color: Colors.white,
-                  size: 20.sp,
-                ),
-                padding: EdgeInsets.zero,
-                offset: const Offset(0, 40),
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    enabled: false,
-                    child: Text(
-                      'Other Actions',
-                      style: TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: 'finish_later',
-                    child: Text('Finish Later'),
-                  ),
-                  const PopupMenuItem(
-                    value: 'decline',
-                    child: Text('Decline to Sign'),
-                  ),
-                ],
-              ),
-            ],
+          child: Text(
+            'FINISH',
+            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13, letterSpacing: 1),
           ),
-        ),
-        SizedBox(width: 12.w),
-        PopupMenuButton<String>(
-          icon: Icon(Icons.more_vert, color: Colors.white, size: 24.sp),
-          offset: const Offset(0, 40),
-          itemBuilder: (context) => [
-            const PopupMenuItem(value: 'help', child: Text('Help & Support')),
-            const PopupMenuItem(value: 'about', child: Text('About')),
-          ],
+        )),
+        SizedBox(width: 8),
+        IconButton(
+          onPressed: () {}, 
+          icon: Icon(Icons.more_vert, color: Colors.white),
+          tooltip: 'Other Actions',
         ),
       ],
     );
@@ -156,114 +132,39 @@ class SigningView extends GetView<SigningController> {
             Center(
               child: Container(
                 constraints: BoxConstraints(
-                  maxWidth: context.width <= 900 ? double.infinity : 800,
+                  maxWidth: context.width <= 900 ? double.infinity : 850,
                 ),
                 width: double.infinity,
-                margin: EdgeInsets.symmetric(
-                  vertical: context.width <= 900 ? 10.h : 40.h,
-                  horizontal: context.width <= 900 ? 5.w : 20.w,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
+                color: AppColors.backgroundLight,
+                child: InteractiveViewer(
+                  minScale: 1.0,
+                  maxScale: 3.0,
+                  child: ListView.builder(
+                    controller: controller.scrollController,
+                    padding: EdgeInsets.symmetric(
+                      vertical: context.isMobile ? 10 : 40,
+                      horizontal: context.isMobile ? 10 : 20,
                     ),
-                  ],
-                ),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final double scale = constraints.maxWidth / 800.0;
-                    return Stack(
-                      children: [
-                        PdfViewPinch(
-                          controller: controller.pdfController,
-                          builders: PdfViewPinchBuilders<DefaultBuilderOptions>(
-                            options: const DefaultBuilderOptions(),
-                            documentLoaderBuilder: (_) => const Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                            pageLoaderBuilder: (_) => const Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                          ),
-                        ),
-                        ...controller.fields.map(
-                          (field) => SignatureFieldGuestOverlay(
-                            field: field,
-                            scale: scale,
-                            onTap: () => controller.onFieldTap(field),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
+                    itemCount: controller.pdfDocument?.pagesCount ?? 0,
+                    itemBuilder: (context, index) {
+                      return _PdfPageWebWidget(
+                        pageIndex: index + 1,
+                        controller: controller,
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
-            // Left Next Ribbon
-            Positioned(left: 0, top: 100.h, child: _buildNextRibbon()),
-            // Bottom Action
-            if (controller.fields.every((f) => f.value != null))
-              Positioned(
-                bottom: 40.h,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: ElevatedButton(
-                    onPressed: controller.finishSigning,
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 48.w,
-                        vertical: 16.h,
-                      ),
-                      backgroundColor: AppColors.navy,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4.r),
-                      ),
-                    ),
-                    child: Text(
-                      'Finish',
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              )
-            else
-              Positioned(
-                bottom: 40.h,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: ElevatedButton(
-                    onPressed: controller.scrollToNextField,
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 48.w,
-                        vertical: 16.h,
-                      ),
-                      backgroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4.r),
-                      ),
-                    ),
-                    child: Text(
-                      'Next',
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
+            // Floating Guidance Button
+            Positioned(
+              bottom: 40,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: _buildGuidanceButton(),
               ),
+            ),
           ],
         );
       }),
@@ -561,7 +462,139 @@ class SigningView extends GetView<SigningController> {
   }
 }
 
+  Widget _buildGuidanceButton() {
+    final bool allDone = controller.fields.isNotEmpty && controller.fields.every((f) => f.value != null);
+    
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      child: ElevatedButton(
+        onPressed: allDone ? controller.finishSigning : controller.scrollToNextField,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.navy,
+          foregroundColor: Colors.white,
+          elevation: 8,
+          padding: EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              allDone ? 'FINISH' : 'START', // Simplified guidance
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.2,
+              ),
+            ),
+            SizedBox(width: 8),
+            Icon(allDone ? Icons.check_circle : Icons.arrow_downward, size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PdfPageWebWidget extends StatefulWidget {
+  final int pageIndex;
+  final SigningController controller;
+
+  const _PdfPageWebWidget({
+    required this.pageIndex,
+    required this.controller,
+  });
+
+  @override
+  State<_PdfPageWebWidget> createState() => _PdfPageWebWidgetState();
+}
+
+class _PdfPageWebWidgetState extends State<_PdfPageWebWidget> {
+  Uint8List? _imageBytes;
+  Size? _pageSize;
+
+  @override
+  void initState() {
+    super.initState();
+    _renderPage();
+  }
+
+  Future<void> _renderPage() async {
+    if (widget.controller.pdfDocument == null) return;
+    
+    final page = await widget.controller.pdfDocument!.getPage(widget.pageIndex);
+    // Render at a high resolution for web clarity
+    final pageImage = await page.render(
+      width: page.width * 2,
+      height: page.height * 2,
+      format: PdfPageFormat.jpg,
+      quality: 100,
+    );
+    
+    if (mounted) {
+      setState(() {
+        _imageBytes = pageImage?.bytes;
+        _pageSize = Size(page.width, page.height);
+      });
+    }
+    await page.close();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_imageBytes == null) {
+      return Container(
+        height: 800,
+        margin: const EdgeInsets.only(bottom: 20),
+        decoration: BoxDecoration(color: Colors.white),
+        child: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double displayW = constraints.maxWidth;
+        final double displayH = displayW * (_pageSize!.height / _pageSize!.width);
+        final double scale = displayW / _pageSize!.width;
+
+        return Center(
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 24),
+            width: displayW,
+            height: displayH,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: Offset(0, 4)),
+              ],
+            ),
+            child: Obx(() {
+              final pageFields = widget.controller.fields
+                  .where((f) => f.page == widget.pageIndex)
+                  .toList();
+
+              return Stack(
+                children: [
+                  Positioned.fill(child: Image.memory(_imageBytes!, fit: BoxFit.fill)),
+                  ...pageFields.map(
+                    (field) => SignatureFieldGuestOverlay(
+                      field: field,
+                      scale: scale,
+                      onTap: () => widget.controller.onFieldTap(field),
+                    ),
+                  ),
+                ],
+              );
+            }),
+          ),
+        );
+      },
+    );
+  }
+}
+
 class _SidebarTool extends StatelessWidget {
+...
   final IconData icon;
   final String label;
   final VoidCallback? onTap;
