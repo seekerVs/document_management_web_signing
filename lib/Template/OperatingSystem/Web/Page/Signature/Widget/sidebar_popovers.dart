@@ -32,11 +32,7 @@ class ThumbnailsPopover extends StatelessWidget {
             itemBuilder: (context, index) {
               return InkWell(
                 onTap: () {
-                  controller.pdfController.animateToPage(
-                    pageNumber: index + 1,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                  );
+                  controller.jumpToPage(index + 1);
                 },
                 child: Column(
                   children: [
@@ -175,11 +171,7 @@ class SearchPopover extends StatelessWidget {
                     leading: Icon(Icons.description, size: 20.sp, color: AppColors.primary),
                     title: Text('Result on Page $pageNum', style: TextStyle(fontSize: 14.sp)),
                     onTap: () {
-                      controller.pdfController.animateToPage(
-                        pageNumber: pageNum,
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      );
+                      controller.jumpToPage(pageNum);
                     },
                   );
                 },

@@ -31,6 +31,7 @@ class SigningController extends GetxController {
   late DocumentProvider _documentProvider;
   late PdfService _pdfService;
   PdfDocument? pdfDocument;
+  late PdfController pdfController;
   final ScrollController scrollController = ScrollController();
 
   @override
@@ -49,6 +50,7 @@ class SigningController extends GetxController {
   @override
   void onClose() {
     pdfDocument?.close();
+    pdfController.dispose();
     scrollController.dispose();
     super.onClose();
   }
@@ -71,8 +73,11 @@ class SigningController extends GetxController {
       // Fetch PDF bytes
       final bytes = await _documentProvider.getDocumentBytes(token.value);
       
-      // Open document
-      pdfDocument = await PdfDocument.openData(bytes);
+      // Initialize PDF Controller
+      pdfController = PdfController(document: PdfDocument.openData(bytes));
+      
+      // Open document reference for the view
+      pdfDocument = await pdfController.document;
       
       // Initial scroll to top
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -199,6 +204,18 @@ class SigningController extends GetxController {
         targetOffset,
         duration: const Duration(milliseconds: 600),
         curve: Curves.easeInOutQuart,
+      );
+    }
+  }
+
+  void jumpToPage(int pageNumber) {
+    if (scrollController.hasClients) {
+      // Estimated page height (consistent with scrollToNextField)
+      final double targetOffset = (pageNumber - 1) * 900.0;
+      scrollController.animateTo(
+        targetOffset,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
       );
     }
   }

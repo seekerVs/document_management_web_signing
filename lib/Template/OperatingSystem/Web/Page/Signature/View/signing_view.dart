@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:typed_data';
 import 'package:get/get.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -142,8 +143,8 @@ class SigningView extends GetView<SigningController> {
                   child: ListView.builder(
                     controller: controller.scrollController,
                     padding: EdgeInsets.symmetric(
-                      vertical: context.isMobile ? 10 : 40,
-                      horizontal: context.isMobile ? 10 : 20,
+                      vertical: context.width <= 900 ? 10 : 40,
+                      horizontal: context.width <= 900 ? 10 : 20,
                     ),
                     itemCount: controller.pdfDocument?.pagesCount ?? 0,
                     itemBuilder: (context, index) {
@@ -199,11 +200,11 @@ class SigningView extends GetView<SigningController> {
           const Spacer(),
           const _SidebarTool(icon: Icons.zoom_in, label: ''),
           Padding(
-            padding: EdgeInsets.symmetric(vertical: 4.h),
+            padding: EdgeInsets.symmetric(vertical: 4),
             child: Text(
               '100%',
               style: TextStyle(
-                fontSize: 12.sp,
+                fontSize: 12,
                 color: AppColors.navy,
                 fontWeight: FontWeight.bold,
               ),
@@ -252,29 +253,6 @@ class SigningView extends GetView<SigningController> {
     });
   }
 
-  Widget _buildNextRibbon() {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-      decoration: BoxDecoration(
-        color: AppColors.navy,
-        borderRadius: BorderRadius.only(
-          topRight: Radius.circular(4.r),
-          bottomRight: Radius.circular(4.r),
-        ),
-        boxShadow: const [
-          BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(2, 2)),
-        ],
-      ),
-      child: Text(
-        'Next',
-        style: TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-          fontSize: 14.sp,
-        ),
-      ),
-    );
-  }
 
   Widget _buildErrorState() {
     return Center(
@@ -460,7 +438,6 @@ class SigningView extends GetView<SigningController> {
       ),
     );
   }
-}
 
   Widget _buildGuidanceButton() {
     final bool allDone = controller.fields.isNotEmpty && controller.fields.every((f) => f.value != null);
@@ -527,8 +504,7 @@ class _PdfPageWebWidgetState extends State<_PdfPageWebWidget> {
     final pageImage = await page.render(
       width: page.width * 2,
       height: page.height * 2,
-      format: PdfPageFormat.jpg,
-      quality: 100,
+      format: PdfPageImageFormat.png,
     );
     
     if (mounted) {
@@ -594,7 +570,6 @@ class _PdfPageWebWidgetState extends State<_PdfPageWebWidget> {
 }
 
 class _SidebarTool extends StatelessWidget {
-...
   final IconData icon;
   final String label;
   final VoidCallback? onTap;
@@ -610,12 +585,12 @@ class _SidebarTool extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: AppColors.navy, size: 24.sp),
+            Icon(icon, color: AppColors.navy, size: 24),
             if (label.isNotEmpty) ...[
-              SizedBox(height: 4.h),
+              SizedBox(height: 4),
               Text(
                 label,
-                style: TextStyle(fontSize: 10.sp, color: AppColors.navy),
+                style: TextStyle(fontSize: 11, color: AppColors.navy),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -646,11 +621,11 @@ class _MobileTool extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: AppColors.textSecondary, size: 20.sp),
-            SizedBox(height: 2.h),
+            Icon(icon, color: AppColors.textSecondary, size: 20),
+            SizedBox(height: 2),
             Text(
               label,
-              style: TextStyle(fontSize: 10.sp, color: AppColors.textSecondary),
+              style: TextStyle(fontSize: 10, color: AppColors.textSecondary),
             ),
           ],
         ),
