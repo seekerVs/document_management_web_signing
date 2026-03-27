@@ -280,7 +280,6 @@ class SigningView extends GetView<SigningController> {
       child: Column(
         children: [
           SizedBox(height: 20.h),
-          const _SidebarTool(icon: Icons.auto_awesome, label: 'Summarize'),
           _SidebarTool(
             icon: Icons.search,
             label: 'Search',
@@ -296,7 +295,6 @@ class SigningView extends GetView<SigningController> {
             label: 'Download',
             onTap: () => controller.togglePopover('download'),
           ),
-          const _SidebarTool(icon: Icons.print_outlined, label: 'Print'),
           const Spacer(),
           const _SidebarTool(icon: Icons.zoom_in, label: ''),
           Padding(
