@@ -109,7 +109,7 @@ class _PdfPageWebWidgetState extends State<_PdfPageWebWidget> {
             ),
             child: Obx(() {
               final pageFields = widget.controller.fields
-                  .where((f) => f.page == widget.pageIndex)
+                  .where((f) => f.page == widget.pageIndex - 1)
                   .toList();
 
               return Stack(
@@ -120,7 +120,8 @@ class _PdfPageWebWidgetState extends State<_PdfPageWebWidget> {
                   ...pageFields.map(
                     (field) => SignatureFieldGuestOverlay(
                       field: field,
-                      scale: scale,
+                      pageWidth: displayW,
+                      pageHeight: displayH,
                       onTap: () => widget.controller.onFieldTap(field),
                     ),
                   ),

@@ -224,11 +224,12 @@ class SigningController extends GetxController {
   void scrollToNextField() {
     final nextField = fields.firstWhereOrNull((f) => f.value == null);
     if (nextField != null && scrollController.hasClients) {
-      // Crude estimate: page height is roughly 850px + margins
-      // A more robust way would be using keys, but this works for most PDFs
-      final double targetOffset = (nextField.page - 1) * 900.0;
+      // nextField.page is 0-indexed from Firestore
+      const double estimatedPageHeight = 1050.0; 
+      final double targetOffset = nextField.page * estimatedPageHeight;
+      
       scrollController.animateTo(
-        targetOffset,
+        targetOffset.clamp(0.0, scrollController.position.maxScrollExtent),
         duration: const Duration(milliseconds: 600),
         curve: Curves.easeInOutQuart,
       );
@@ -237,10 +238,11 @@ class SigningController extends GetxController {
 
   void jumpToPage(int pageNumber) {
     if (scrollController.hasClients) {
-      // Estimated page height (consistent with scrollToNextField)
-      final double targetOffset = (pageNumber - 1) * 900.0;
+      // pageNumber from sidebar is 1-indexed
+      const double estimatedPageHeight = 1050.0;
+      final double targetOffset = (pageNumber - 1) * estimatedPageHeight;
       scrollController.animateTo(
-        targetOffset,
+        targetOffset.clamp(0.0, scrollController.position.maxScrollExtent),
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );

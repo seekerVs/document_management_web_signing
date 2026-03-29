@@ -8,20 +8,24 @@ import '../../../../../Utils/Constant/enum.dart';
 class SignatureFieldGuestOverlay extends StatelessWidget {
   final SignatureFieldModel field;
   final VoidCallback onTap;
-  final double scale;
+  final double pageWidth;
+  final double pageHeight;
 
   const SignatureFieldGuestOverlay({
     super.key,
     required this.field,
     required this.onTap,
-    this.scale = 1.0,
+    required this.pageWidth,
+    required this.pageHeight,
   });
+
+  double get _scale => pageWidth / 600.0; // Dynamic scale for UI elements (icons/text) based on a 600px reference
 
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      left: field.x * scale,
-      top: field.y * scale,
+      left: field.x * pageWidth,
+      top: field.y * pageHeight,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
@@ -29,8 +33,8 @@ class SignatureFieldGuestOverlay extends StatelessWidget {
           GestureDetector(
             onTap: onTap,
             child: Container(
-              width: field.width * scale,
-              height: field.height * scale,
+              width: field.width * pageWidth,
+              height: field.height * pageHeight,
               decoration: BoxDecoration(
                 color: field.value == null
                     ? (field.type == SignatureFieldType.checkbox
@@ -51,15 +55,15 @@ class SignatureFieldGuestOverlay extends StatelessWidget {
                   field.type == SignatureFieldType.checkbox ? 4.r : 6.r,
                 ),
               ),
-              child: _buildFieldContent(scale),
+              child: _buildFieldContent(_scale),
             ),
           ),
           // Tooltip
           if (field.value == null && field.type != SignatureFieldType.checkbox)
             Positioned(
-              top: -24.h * scale,
+              top: -24.h * _scale,
               left: 0,
-              child: _buildTooltip(scale),
+              child: _buildTooltip(_scale),
             ),
         ],
       ),
