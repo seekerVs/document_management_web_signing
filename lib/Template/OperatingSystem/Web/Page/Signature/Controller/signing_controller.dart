@@ -90,8 +90,17 @@ class SigningController extends GetxController {
         }
       });
 
-      // Filter fields for the current guest signer (simplified: first signer in session for now)
-      if (request.signers.isNotEmpty) {
+      // Filter fields for the current guest signer matching the token's email
+      if (request.targetSignerEmail != null) {
+        final currentSigner = request.signers.firstWhereOrNull(
+          (s) => s.signerEmail.toLowerCase() == request.targetSignerEmail!.toLowerCase()
+        );
+        if (currentSigner != null) {
+          fields.assignAll(currentSigner.fields);
+        } else if (request.signers.isNotEmpty) {
+          fields.assignAll(request.signers.first.fields);
+        }
+      } else if (request.signers.isNotEmpty) {
         fields.assignAll(request.signers.first.fields);
       }
 

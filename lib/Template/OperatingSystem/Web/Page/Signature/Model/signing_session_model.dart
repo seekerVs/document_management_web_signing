@@ -65,6 +65,7 @@ class SignatureRequestModel {
   final String documentUrl;
   final List<SignerModel> signers;
   final SignatureRequestStatus status;
+  final String? targetSignerEmail;
 
   SignatureRequestModel({
     required this.requestId,
@@ -72,6 +73,7 @@ class SignatureRequestModel {
     required this.documentUrl,
     required this.signers,
     this.status = SignatureRequestStatus.pending,
+    this.targetSignerEmail,
   });
 
   factory SignatureRequestModel.fromMap(Map<String, dynamic> data, String id) {
@@ -86,6 +88,7 @@ class SignatureRequestModel {
         (s) => s.name == (data['status'] ?? 'pending'),
         orElse: () => SignatureRequestStatus.pending,
       ),
+      targetSignerEmail: data['targetSignerEmail'],
     );
   }
 }
