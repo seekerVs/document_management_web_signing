@@ -45,7 +45,7 @@ class SigningSidebar extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 4),
             child: Obx(() => Text(
-              '${(controller.currentScale.value * 100).toInt()}%',
+              '${(controller.zoomLevel.value * 100).toInt()}%',
               style: const TextStyle(
                 fontSize: 12,
                 color: AppColors.navy,

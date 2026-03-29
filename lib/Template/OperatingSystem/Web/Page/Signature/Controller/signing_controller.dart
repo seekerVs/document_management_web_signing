@@ -27,14 +27,14 @@ class SigningController extends GetxController {
   final RxList<int> searchResults = <int>[].obs;
   final RxString searchQuery = ''.obs;
   final RxBool isSearching = false.obs;
+  final RxDouble zoomLevel = 1.0.obs;
+  final TransformationController transformationController = TransformationController();
 
   late DocumentProvider _documentProvider;
   late PdfService _pdfService;
   PdfDocument? pdfDocument;
   late PdfController pdfController;
   final ScrollController scrollController = ScrollController();
-  final TransformationController transformationController = TransformationController();
-  final RxDouble currentScale = 1.0.obs;
 
   @override
   void onInit() {
@@ -43,11 +43,6 @@ class SigningController extends GetxController {
     _pdfService = PdfService();
     _extractToken();
     _loadDocumentData();
-
-    // Listen to zoom changes
-    transformationController.addListener(() {
-      currentScale.value = transformationController.value.getMaxScaleOnAxis();
-    });
   }
 
   void _extractToken() {
@@ -229,18 +224,26 @@ class SigningController extends GetxController {
   }
 
   void zoomIn() {
-    final double newScale = (currentScale.value + 0.25).clamp(1.0, 3.0);
-    _updateZoom(newScale);
+    final double nextZoom = (zoomLevel.value + 0.25).clamp(1.0, 3.0);
+    _updateZoom(nextZoom);
   }
 
   void zoomOut() {
-    final double newScale = (currentScale.value - 0.25).clamp(1.0, 3.0);
-    _updateZoom(newScale);
+    final double nextZoom = (zoomLevel.value - 0.25).clamp(1.0, 3.0);
+    _updateZoom(nextZoom);
   }
 
-  void _updateZoom(double scale) {
-    final Matrix4 matrix = Matrix4.identity()..scale(scale);
-    transformationController.value = matrix;
+  void _updateZoom(double value) {
+    zoomLevel.value = value;
+    transformationController.value = Matrix4.identity()..scale(value);
+  }
+
+  void onInteractionUpdate(ScaleUpdateDetails details) {
+    // Sync internal zoomLevel with InteractiveViewer state
+    final double currentScale = transformationController.value.getMaxScaleOnAxis();
+    if ((currentScale - zoomLevel.value).abs() > 0.01) {
+      zoomLevel.value = currentScale;
+    }
   }
 
   Future<void> finishSigning() async {
