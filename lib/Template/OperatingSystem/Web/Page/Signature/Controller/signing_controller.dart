@@ -28,7 +28,8 @@ class SigningController extends GetxController {
   final RxString searchQuery = ''.obs;
   final RxBool isSearching = false.obs;
   final RxDouble zoomLevel = 1.0.obs;
-  final TransformationController transformationController = TransformationController();
+  final TransformationController transformationController =
+      TransformationController();
 
   late DocumentProvider _documentProvider;
   late PdfService _pdfService;
@@ -68,32 +69,32 @@ class SigningController extends GetxController {
 
     try {
       isLoading.value = true;
-      
+
       // Fetch metadata
       final request = await _documentProvider.getSignatureRequest(token.value);
       session.value = request;
-      
+
       // Fetch PDF bytes
       final bytes = await _documentProvider.getDocumentBytes(token.value);
-      
+
       // Initialize PDF Controller
       pdfController = PdfController(document: PdfDocument.openData(bytes));
-      
+
       // Open document reference for the view
       pdfDocument = await pdfController.document;
-      
+
       // Initial scroll to top
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (scrollController.hasClients) {
           scrollController.jumpTo(0);
         }
       });
-      
+
       // Filter fields for the current guest signer (simplified: first signer in session for now)
       if (request.signers.isNotEmpty) {
         fields.assignAll(request.signers.first.fields);
       }
-      
+
       isLoading.value = false;
     } catch (e) {
       isLoading.value = false;
@@ -144,10 +145,16 @@ class SigningController extends GetxController {
   }
 
   void _openTextInputModal(SignatureFieldModel field) {
-    final textController = TextEditingController(text: field.value?.toString() ?? '');
+    final textController = TextEditingController(
+      text: field.value?.toString() ?? '',
+    );
     Get.defaultDialog(
       title: 'Enter Text',
-      titleStyle: TextStyle(fontSize: 18.sp, color: AppColors.navy, fontWeight: FontWeight.bold),
+      titleStyle: TextStyle(
+        fontSize: 18.sp,
+        color: AppColors.primary,
+        fontWeight: FontWeight.bold,
+      ),
       content: Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.w),
         child: TextField(
@@ -155,18 +162,26 @@ class SigningController extends GetxController {
           autofocus: true,
           decoration: InputDecoration(
             hintText: 'Type something...',
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(4.r)),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(4.r),
+            ),
           ),
         ),
       ),
       confirm: ElevatedButton(
         onPressed: () {
-          _applySignature(field, textController.text.isEmpty ? null : textController.text);
+          _applySignature(
+            field,
+            textController.text.isEmpty ? null : textController.text,
+          );
           Get.back();
         },
         child: const Text('OK'),
       ),
-      cancel: TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+      cancel: TextButton(
+        onPressed: () => Get.back(),
+        child: const Text('Cancel'),
+      ),
     );
   }
 
@@ -202,7 +217,7 @@ class SigningController extends GetxController {
     if (nextField != null && scrollController.hasClients) {
       // Crude estimate: page height is roughly 850px + margins
       // A more robust way would be using keys, but this works for most PDFs
-      final double targetOffset = (nextField.page - 1) * 900.0; 
+      final double targetOffset = (nextField.page - 1) * 900.0;
       scrollController.animateTo(
         targetOffset,
         duration: const Duration(milliseconds: 600),
@@ -240,7 +255,8 @@ class SigningController extends GetxController {
 
   void onInteractionUpdate(ScaleUpdateDetails details) {
     // Sync internal zoomLevel with InteractiveViewer state
-    final double currentScale = transformationController.value.getMaxScaleOnAxis();
+    final double currentScale = transformationController.value
+        .getMaxScaleOnAxis();
     if ((currentScale - zoomLevel.value).abs() > 0.01) {
       zoomLevel.value = currentScale;
     }
@@ -262,11 +278,15 @@ class SigningController extends GetxController {
     isLoading.value = true;
     try {
       // Collect signature data
-      final List<Map<String, dynamic>> signatureData = fields.map((f) => {
-        'fieldId': f.fieldId,
-        'value': f.value is Uint8List ? base64Encode(f.value) : f.value,
-        'type': f.type.name,
-      }).toList();
+      final List<Map<String, dynamic>> signatureData = fields
+          .map(
+            (f) => {
+              'fieldId': f.fieldId,
+              'value': f.value is Uint8List ? base64Encode(f.value) : f.value,
+              'type': f.type.name,
+            },
+          )
+          .toList();
 
       // Submit to API
       await _documentProvider.submitSignature(
@@ -276,11 +296,8 @@ class SigningController extends GetxController {
 
       // Simulate local PDF processing (UI feedback)
       await Future.delayed(const Duration(seconds: 1));
-      
-      Get.dialog(
-        const SuccessModal(),
-        barrierDismissible: false,
-      );
+
+      Get.dialog(const SuccessModal(), barrierDismissible: false);
     } catch (e) {
       Get.snackbar('Error', 'Failed to process document');
     } finally {
@@ -313,6 +330,7 @@ class SigningController extends GetxController {
       isSearching.value = false;
     }
   }
+
   Future<void> downloadDocument() async {
     try {
       final doc = await pdfController.document;
@@ -327,16 +345,22 @@ class SigningController extends GetxController {
         ..setAttribute("download", "signed_document.pdf")
         ..click();
       html.Url.revokeObjectUrl(url);
-      
-      Get.snackbar('Success', 'Document downloaded successfully',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white);
+
+      Get.snackbar(
+        'Success',
+        'Document downloaded successfully',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
     } catch (e) {
-      Get.snackbar('Error', 'Failed to generate PDF: $e',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white);
+      Get.snackbar(
+        'Error',
+        'Failed to generate PDF: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     }
   }
 }

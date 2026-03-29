@@ -30,7 +30,7 @@ class UploadSignatureTab extends StatelessWidget {
               onPressed: () {},
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
-                foregroundColor: AppColors.navy,
+                foregroundColor: AppColors.primary,
                 side: const BorderSide(color: AppColors.borderLight),
                 shadowColor: Colors.transparent,
               ),

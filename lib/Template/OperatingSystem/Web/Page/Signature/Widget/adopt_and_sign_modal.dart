@@ -95,7 +95,7 @@ class _AdoptAndSignModalState extends State<AdoptAndSignModal>
                           Text(
                             'Confirm your name, initials, and signature.',
                             style: TextStyle(
-                              color: AppColors.navy,
+                              color: AppColors.primary,
                               fontSize: 14.sp,
                             ),
                           ),
@@ -147,20 +147,28 @@ class _AdoptAndSignModalState extends State<AdoptAndSignModal>
                               ValueListenableBuilder<TextEditingValue>(
                                 valueListenable: _nameController,
                                 builder: (context, nameVal, _) {
-                                  return ValueListenableBuilder<TextEditingValue>(
+                                  return ValueListenableBuilder<
+                                    TextEditingValue
+                                  >(
                                     valueListenable: _initialsController,
                                     builder: (context, initialsVal, _) {
-                                      final bool isEnabled = nameVal.text.isNotEmpty && initialsVal.text.isNotEmpty;
+                                      final bool isEnabled =
+                                          nameVal.text.isNotEmpty &&
+                                          initialsVal.text.isNotEmpty;
                                       return ElevatedButton(
-                                        onPressed: isEnabled ? _handleAdopt : null,
+                                        onPressed: isEnabled
+                                            ? _handleAdopt
+                                            : null,
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: AppColors.navy,
+                                          backgroundColor: AppColors.primary,
                                           padding: EdgeInsets.symmetric(
                                             horizontal: 24.w,
                                             vertical: 16.h,
                                           ),
                                           shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(4.r),
+                                            borderRadius: BorderRadius.circular(
+                                              4.r,
+                                            ),
                                           ),
                                         ),
                                         child: Text(
@@ -192,7 +200,7 @@ class _AdoptAndSignModalState extends State<AdoptAndSignModal>
                                 child: Text(
                                   'Cancel',
                                   style: TextStyle(
-                                    color: AppColors.navy,
+                                    color: AppColors.primary,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 14.sp,
                                   ),
@@ -245,7 +253,7 @@ class _AdoptAndSignModalState extends State<AdoptAndSignModal>
             style: TextStyle(
               fontSize: 18.sp,
               fontWeight: FontWeight.bold,
-              color: AppColors.navy,
+              color: AppColors.primary,
             ),
           ),
           InkWell(
@@ -272,7 +280,7 @@ class _AdoptAndSignModalState extends State<AdoptAndSignModal>
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 12.sp,
-                color: AppColors.navy,
+                color: AppColors.primary,
               ),
             ),
             if (label.contains('*'))
@@ -451,8 +459,9 @@ class _AdoptAndSignModalState extends State<AdoptAndSignModal>
     if (_tabController.index == 0) {
       // 1. SELECT STYLE: Capture the RepaintBoundary
       try {
-        RenderRepaintBoundary? boundary = 
-            _previewKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+        RenderRepaintBoundary? boundary =
+            _previewKey.currentContext?.findRenderObject()
+                as RenderRepaintBoundary?;
         if (boundary != null) {
           var image = await boundary.toImage(pixelRatio: 3.0);
           var byteData = await image.toByteData(format: ImageByteFormat.png);

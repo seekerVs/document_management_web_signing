@@ -38,23 +38,25 @@ class SigningSidebar extends StatelessWidget {
           ),
           const Spacer(),
           _SidebarTool(
-            icon: Icons.zoom_in, 
+            icon: Icons.zoom_in,
             label: '',
             onTap: controller.zoomIn,
           ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Obx(() => Text(
-              '${(controller.zoomLevel.value * 100).toInt()}%',
-              style: const TextStyle(
-                fontSize: 12,
-                color: AppColors.navy,
-                fontWeight: FontWeight.bold,
+            child: Obx(
+              () => Text(
+                '${(controller.zoomLevel.value * 100).toInt()}%',
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            )),
+            ),
           ),
           _SidebarTool(
-            icon: Icons.zoom_out, 
+            icon: Icons.zoom_out,
             label: '',
             onTap: controller.zoomOut,
           ),
@@ -204,12 +206,12 @@ class _SidebarTool extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: AppColors.navy, size: 24),
+            Icon(icon, color: AppColors.primary, size: 24),
             if (label.isNotEmpty) ...[
               const SizedBox(height: 4),
               Text(
                 label,
-                style: const TextStyle(fontSize: 11, color: AppColors.navy),
+                style: const TextStyle(fontSize: 11, color: AppColors.primary),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -244,7 +246,10 @@ class _MobileTool extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               label,
-              style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
+              style: const TextStyle(
+                fontSize: 10,
+                color: AppColors.textSecondary,
+              ),
             ),
           ],
         ),

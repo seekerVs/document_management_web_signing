@@ -130,7 +130,7 @@ class SigningView extends GetView<SigningController> {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: AppColors.navy,
+                color: AppColors.primary,
               ),
             ),
             const SizedBox(height: 8),

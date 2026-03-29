@@ -30,7 +30,7 @@ class SignaturePreviewFrame extends StatelessWidget {
               Text(
                 'Signed by:',
                 style: TextStyle(
-                  color: AppColors.navy,
+                  color: AppColors.primary,
                   fontSize: 10.sp,
                   fontWeight: FontWeight.bold,
                 ),
@@ -71,7 +71,7 @@ class SignaturePreviewFrame extends StatelessWidget {
               Text(
                 'DS',
                 style: TextStyle(
-                  color: AppColors.navy,
+                  color: AppColors.primary,
                   fontSize: 10.sp,
                   fontWeight: FontWeight.bold,
                 ),

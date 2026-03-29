@@ -16,17 +16,25 @@ class SigningHeader extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppColors.navy, AppColors.navy.withOpacity(0.85)],
+          colors: [AppColors.primary, AppColors.primary.withOpacity(0.85)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 8, offset: const Offset(0, 2)),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
         ],
       ),
       child: Row(
         children: [
-          Icon(Icons.description, color: Colors.white, size: isMobile ? 20 : 24),
+          Icon(
+            Icons.description,
+            color: Colors.white,
+            size: isMobile ? 20 : 24,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -41,14 +49,16 @@ class SigningHeader extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                Obx(() => Text(
-                  '${controller.fields.where((f) => f.value != null).length} of ${controller.fields.length} fields completed',
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
+                Obx(
+                  () => Text(
+                    '${controller.fields.where((f) => f.value != null).length} of ${controller.fields.length} fields completed',
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                )),
+                ),
               ],
             ),
           ),
@@ -60,7 +70,9 @@ class SigningHeader extends StatelessWidget {
 
   Widget _buildHeaderActions() {
     return Obx(() {
-      final bool allDone = controller.fields.isNotEmpty && controller.fields.every((f) => f.value != null);
+      final bool allDone =
+          controller.fields.isNotEmpty &&
+          controller.fields.every((f) => f.value != null);
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -68,21 +80,27 @@ class SigningHeader extends StatelessWidget {
             onPressed: allDone ? controller.finishSigning : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
-              foregroundColor: AppColors.navy,
+              foregroundColor: AppColors.primary,
               disabledBackgroundColor: Colors.white24,
               disabledForegroundColor: Colors.white38,
               elevation: 0,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
             ),
             child: const Text(
               'FINISH',
-              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13, letterSpacing: 1),
+              style: TextStyle(
+                fontWeight: FontWeight.w800,
+                fontSize: 13,
+                letterSpacing: 1,
+              ),
             ),
           ),
           const SizedBox(width: 8),
           IconButton(
-            onPressed: () {}, 
+            onPressed: () {},
             icon: const Icon(Icons.more_vert, color: Colors.white),
             tooltip: 'Other Actions',
           ),

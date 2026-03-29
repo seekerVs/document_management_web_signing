@@ -30,10 +30,14 @@ class SuccessModal extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.navy.withOpacity(0.1),
+                color: AppColors.primary.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.check_circle, color: AppColors.navy, size: 48),
+              child: Icon(
+                Icons.check_circle,
+                color: AppColors.primary,
+                size: 48,
+              ),
             ),
             const SizedBox(height: 24),
             Text(
@@ -59,7 +63,7 @@ class SuccessModal extends StatelessWidget {
             ElevatedButton(
               onPressed: () => Get.back(),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.navy,
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 48,

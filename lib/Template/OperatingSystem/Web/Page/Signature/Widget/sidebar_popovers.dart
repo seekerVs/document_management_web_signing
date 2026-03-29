@@ -18,7 +18,8 @@ class ThumbnailsPopover extends StatelessWidget {
       child: FutureBuilder<PdfDocument>(
         future: controller.pdfController.document,
         builder: (context, snapshot) {
-          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+          if (!snapshot.hasData)
+            return const Center(child: CircularProgressIndicator());
           final doc = snapshot.data!;
           return GridView.builder(
             padding: EdgeInsets.all(16.w),
@@ -40,16 +41,21 @@ class ThumbnailsPopover extends StatelessWidget {
                       child: Container(
                         decoration: BoxDecoration(
                           border: Border.all(color: AppColors.borderLight),
-                          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 2)],
+                          boxShadow: const [
+                            BoxShadow(color: Colors.black12, blurRadius: 2),
+                          ],
                         ),
-                        child: PdfThumbnail(
-                          pageIndex: index,
-                          document: doc,
-                        ),
+                        child: PdfThumbnail(pageIndex: index, document: doc),
                       ),
                     ),
                     SizedBox(height: 4.h),
-                    Text('${index + 1}', style: TextStyle(fontSize: 10.sp, color: AppColors.textSecondary)),
+                    Text(
+                      '${index + 1}',
+                      style: TextStyle(
+                        fontSize: 10.sp,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
                   ],
                 ),
               );
@@ -65,24 +71,38 @@ class PdfThumbnail extends StatelessWidget {
   final int pageIndex;
   final PdfDocument document;
 
-  const PdfThumbnail({super.key, required this.pageIndex, required this.document});
+  const PdfThumbnail({
+    super.key,
+    required this.pageIndex,
+    required this.document,
+  });
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<PdfPageImage?>(
       future: _renderPage(),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+        if (snapshot.connectionState == ConnectionState.done &&
+            snapshot.hasData) {
           return Image.memory(snapshot.data!.bytes);
         }
-        return const Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)));
+        return const Center(
+          child: SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        );
       },
     );
   }
 
   Future<PdfPageImage?> _renderPage() async {
     final page = await document.getPage(pageIndex + 1);
-    final pageImage = await page.render(width: page.width / 4, height: page.height / 4);
+    final pageImage = await page.render(
+      width: page.width / 4,
+      height: page.height / 4,
+    );
     await page.close();
     return pageImage;
   }
@@ -118,7 +138,11 @@ class DownloadPopover extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
         child: Row(
           children: [
-            Icon(Icons.file_download_outlined, size: 18.sp, color: AppColors.primary),
+            Icon(
+              Icons.file_download_outlined,
+              size: 18.sp,
+              color: AppColors.primary,
+            ),
             SizedBox(width: 12.w),
             Text(label, style: TextStyle(fontSize: 14.sp)),
           ],
@@ -148,7 +172,9 @@ class SearchPopover extends StatelessWidget {
                 hintText: 'Find in Document',
                 prefixIcon: const Icon(Icons.search),
                 isDense: true,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(4.r)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
               ),
             ),
           ),
@@ -157,10 +183,16 @@ class SearchPopover extends StatelessWidget {
               if (controller.isSearching.value) {
                 return const Center(child: CircularProgressIndicator());
               }
-              if (controller.searchResults.isEmpty && controller.searchQuery.isNotEmpty) {
+              if (controller.searchResults.isEmpty &&
+                  controller.searchQuery.isNotEmpty) {
                 return Center(
-                  child: Text('No results for "${controller.searchQuery.value}"',
-                      style: TextStyle(color: AppColors.textSecondary, fontSize: 13.sp)),
+                  child: Text(
+                    'No results for "${controller.searchQuery.value}"',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 13.sp,
+                    ),
+                  ),
                 );
               }
               return ListView.builder(
@@ -168,8 +200,15 @@ class SearchPopover extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final pageNum = controller.searchResults[index];
                   return ListTile(
-                    leading: Icon(Icons.description, size: 20.sp, color: AppColors.primary),
-                    title: Text('Result on Page $pageNum', style: TextStyle(fontSize: 14.sp)),
+                    leading: Icon(
+                      Icons.description,
+                      size: 20.sp,
+                      color: AppColors.primary,
+                    ),
+                    title: Text(
+                      'Result on Page $pageNum',
+                      style: TextStyle(fontSize: 14.sp),
+                    ),
                     onTap: () {
                       controller.jumpToPage(pageNum);
                     },
@@ -203,7 +242,11 @@ class _PopoverContainer extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.horizontal(left: Radius.circular(8.r)),
         boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(-2, 0)),
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 10,
+            offset: Offset(-2, 0),
+          ),
         ],
       ),
       child: Column(
@@ -214,8 +257,18 @@ class _PopoverContainer extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(title, style: TextStyle(fontSize: 18.sp, color: AppColors.navy)),
-                InkWell(onTap: onClose, child: Icon(Icons.close, size: 24.sp, color: AppColors.navy)),
+                Text(
+                  title,
+                  style: TextStyle(fontSize: 18.sp, color: AppColors.primary),
+                ),
+                InkWell(
+                  onTap: onClose,
+                  child: Icon(
+                    Icons.close,
+                    size: 24.sp,
+                    color: AppColors.primary,
+                  ),
+                ),
               ],
             ),
           ),

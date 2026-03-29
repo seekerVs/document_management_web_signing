@@ -11,18 +11,24 @@ class GuidanceButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final bool allDone = controller.fields.isNotEmpty && controller.fields.every((f) => f.value != null);
-      
+      final bool allDone =
+          controller.fields.isNotEmpty &&
+          controller.fields.every((f) => f.value != null);
+
       return AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         child: ElevatedButton(
-          onPressed: allDone ? controller.finishSigning : controller.scrollToNextField,
+          onPressed: allDone
+              ? controller.finishSigning
+              : controller.scrollToNextField,
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.navy,
+            backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
             elevation: 8,
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(50),
+            ),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -36,7 +42,10 @@ class GuidanceButton extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Icon(allDone ? Icons.check_circle : Icons.arrow_downward, size: 20),
+              Icon(
+                allDone ? Icons.check_circle : Icons.arrow_downward,
+                size: 20,
+              ),
             ],
           ),
         ),
