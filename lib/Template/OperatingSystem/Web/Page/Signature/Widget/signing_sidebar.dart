@@ -37,19 +37,27 @@ class SigningSidebar extends StatelessWidget {
             onTap: () => controller.togglePopover('download'),
           ),
           const Spacer(),
-          const _SidebarTool(icon: Icons.zoom_in, label: ''),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 4),
-            child: Text(
-              '100%',
-              style: TextStyle(
+          _SidebarTool(
+            icon: Icons.zoom_in, 
+            label: '',
+            onTap: controller.zoomIn,
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Obx(() => Text(
+              '${(controller.currentScale.value * 100).toInt()}%',
+              style: const TextStyle(
                 fontSize: 12,
                 color: AppColors.navy,
                 fontWeight: FontWeight.bold,
               ),
-            ),
+            )),
           ),
-          const _SidebarTool(icon: Icons.zoom_out, label: ''),
+          _SidebarTool(
+            icon: Icons.zoom_out, 
+            label: '',
+            onTap: controller.zoomOut,
+          ),
           SizedBox(height: 20.h),
         ],
       ),

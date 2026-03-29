@@ -33,6 +33,8 @@ class SigningController extends GetxController {
   PdfDocument? pdfDocument;
   late PdfController pdfController;
   final ScrollController scrollController = ScrollController();
+  final TransformationController transformationController = TransformationController();
+  final RxDouble currentScale = 1.0.obs;
 
   @override
   void onInit() {
@@ -41,6 +43,11 @@ class SigningController extends GetxController {
     _pdfService = PdfService();
     _extractToken();
     _loadDocumentData();
+
+    // Listen to zoom changes
+    transformationController.addListener(() {
+      currentScale.value = transformationController.value.getMaxScaleOnAxis();
+    });
   }
 
   void _extractToken() {
@@ -52,6 +59,7 @@ class SigningController extends GetxController {
     pdfDocument?.close();
     pdfController.dispose();
     scrollController.dispose();
+    transformationController.dispose();
     super.onClose();
   }
 
@@ -218,6 +226,21 @@ class SigningController extends GetxController {
         curve: Curves.easeInOut,
       );
     }
+  }
+
+  void zoomIn() {
+    final double newScale = (currentScale.value + 0.25).clamp(1.0, 3.0);
+    _updateZoom(newScale);
+  }
+
+  void zoomOut() {
+    final double newScale = (currentScale.value - 0.25).clamp(1.0, 3.0);
+    _updateZoom(newScale);
+  }
+
+  void _updateZoom(double scale) {
+    final Matrix4 matrix = Matrix4.identity()..scale(scale);
+    transformationController.value = matrix;
   }
 
   Future<void> finishSigning() async {
