@@ -29,10 +29,9 @@ class DrawSignatureTab extends StatelessWidget {
               padding: EdgeInsets.all(8.w),
               child: Text(
                 'Draw your signature',
-                style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 12.sp,
-                ),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
               ),
             ),
             ClipRRect(

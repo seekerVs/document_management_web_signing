@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_web_plugins/url_strategy.dart';
-import 'Template/Utils/Constant/colors.dart';
+import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'Template/Utils/Themes/theme.dart';
 import 'Template/OperatingSystem/Web/Page/Signature/View/signing_view.dart';
 import 'Template/OperatingSystem/Web/Page/Signature/Controller/signing_controller.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+
 
 void main() {
-  setUrlStrategy(PathUrlStrategy());
+  usePathUrlStrategy();
   runApp(const MyApp());
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -24,39 +27,7 @@ class MyApp extends StatelessWidget {
         return GetMaterialApp(
           title: 'Scrivener Guest Signing',
           debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            useMaterial3: true,
-            primaryColor: AppColors.primary,
-            scaffoldBackgroundColor: AppColors.backgroundLight,
-            fontFamily: 'Inter',
-            appBarTheme: const AppBarTheme(
-              backgroundColor: Colors.white,
-              elevation: 0,
-              iconTheme: IconThemeData(color: AppColors.textPrimary),
-              titleTextStyle: TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            textTheme: const TextTheme(
-              titleLarge: TextStyle(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.bold,
-              ),
-              bodyMedium: TextStyle(color: AppColors.textPrimary),
-            ),
-            elevatedButtonTheme: ElevatedButtonThemeData(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                elevation: 0,
-              ),
-            ),
-          ),
+          theme: AppTheme.light,
           initialRoute: '/',
           getPages: [
             GetPage(

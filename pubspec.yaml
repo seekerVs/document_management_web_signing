@@ -43,6 +43,7 @@ dependencies:
   flutter_svg: ^2.2.4
   flutter_screenutil: 5.9.3
   pdf: ^3.12.0
+  web: ^1.1.0
 
 dev_dependencies:
   flutter_test:
@@ -70,7 +71,6 @@ flutter:
     - assets/icons/
     - assets/animations/
     - assets/fonts/
-    - assets/sample.pdf
 
   fonts:
     - family: Inter

@@ -18,8 +18,9 @@ class ThumbnailsPopover extends StatelessWidget {
       child: FutureBuilder<PdfDocument>(
         future: controller.pdfController.document,
         builder: (context, snapshot) {
-          if (!snapshot.hasData)
+          if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
+          }
           final doc = snapshot.data!;
           return GridView.builder(
             padding: EdgeInsets.all(16.w),
@@ -51,10 +52,11 @@ class ThumbnailsPopover extends StatelessWidget {
                     SizedBox(height: 4.h),
                     Text(
                       '${index + 1}',
-                      style: TextStyle(
-                        fontSize: 10.sp,
-                        color: AppColors.textSecondary,
-                      ),
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: AppColors.primary,
+                      fontSize: 9.sp,
+                      fontWeight: FontWeight.w500,
+                    ),
                     ),
                   ],
                 ),
@@ -121,14 +123,14 @@ class DownloadPopover extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildOption('Combined PDF', controller),
-          _buildOption('Separate PDFs', controller),
+          _buildOption(context, 'Combined PDF', controller),
+          _buildOption(context, 'Separate PDFs', controller),
         ],
       ),
     );
   }
 
-  Widget _buildOption(String label, SigningController controller) {
+  Widget _buildOption(BuildContext context, String label, SigningController controller) {
     return InkWell(
       onTap: () {
         onClose();
@@ -144,7 +146,10 @@ class DownloadPopover extends StatelessWidget {
               color: AppColors.primary,
             ),
             SizedBox(width: 12.w),
-            Text(label, style: TextStyle(fontSize: 14.sp)),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
           ],
         ),
       ),
@@ -188,10 +193,9 @@ class SearchPopover extends StatelessWidget {
                 return Center(
                   child: Text(
                     'No results for "${controller.searchQuery.value}"',
-                    style: TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 13.sp,
-                    ),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
                   ),
                 );
               }
@@ -207,7 +211,7 @@ class SearchPopover extends StatelessWidget {
                     ),
                     title: Text(
                       'Result on Page $pageNum',
-                      style: TextStyle(fontSize: 14.sp),
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     onTap: () {
                       controller.jumpToPage(pageNum);
@@ -259,13 +263,16 @@ class _PopoverContainer extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: TextStyle(fontSize: 18.sp, color: AppColors.primary),
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 InkWell(
                   onTap: onClose,
                   child: Icon(
                     Icons.close,
-                    size: 24.sp,
+                    size: 18.sp,
                     color: AppColors.primary,
                   ),
                 ),

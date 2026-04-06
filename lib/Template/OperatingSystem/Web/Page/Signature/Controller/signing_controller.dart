@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
-import 'dart:html' as html;
+import 'dart:js_interop';
+import 'package:web/web.dart' as web;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -21,12 +22,23 @@ class SigningController extends GetxController {
   final Rxn<SignatureRequestModel> session = Rxn<SignatureRequestModel>();
   final RxBool isLoading = true.obs;
   final RxString error = ''.obs;
+  final RxBool isLinkExpired = false.obs;
   final RxString token = ''.obs;
   final RxString activePopover = ''.obs;
   final RxList<SignatureFieldModel> fields = <SignatureFieldModel>[].obs;
+  final RxnString activeFieldId = RxnString();
   final RxList<int> searchResults = <int>[].obs;
   final RxString searchQuery = ''.obs;
   final RxBool isSearching = false.obs;
+  final RxBool hasStarted = false.obs;
+  final RxnString activeFieldActionFieldId = RxnString();
+
+  // ── Navigation Tab tracking ──
+  final Map<String, GlobalKey> fieldKeys = {};
+  final GlobalKey bottomFinishButtonKey = GlobalKey(debugLabel: 'bottomFinishButton');
+  final RxDouble guidanceTabTop = 100.0.obs;
+  final RxDouble guidanceTabLeft = 0.0.obs;
+  final GlobalKey documentAreaKey = GlobalKey(debugLabel: 'documentArea');
   final RxDouble zoomLevel = 1.0.obs;
   final TransformationController transformationController =
       TransformationController();
@@ -100,21 +112,42 @@ class SigningController extends GetxController {
         } else if (request.signers.isNotEmpty) {
           fields.assignAll(request.signers.first.fields);
         }
-      } else if (request.signers.isNotEmpty) {
-        fields.assignAll(request.signers.first.fields);
       }
+
+      // Initialize GlobalKeys for field tracking
+      _initFieldKeys();
+
+      // Auto-fill date fields with today's date
+      _autoFillDateFields();
+
+      // Initial active field is the first unsigned one
+      _updateActiveField();
+      
+      // Ensure tab is positioned correctly on first load
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (activeFieldId.value != null) {
+          _alignTabToField(activeFieldId.value!);
+        }
+      });
 
       isLoading.value = false;
     } catch (e) {
       isLoading.value = false;
-      error.value = 'Failed to load document: $e';
-      Get.snackbar(
-        'Error',
-        'Could not load document: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      final errorStr = e.toString().toLowerCase();
+      if (errorStr.contains('expired')) {
+        isLinkExpired.value = true;
+        error.value = 'expired';
+      } else {
+        isLinkExpired.value = false;
+        error.value = 'Failed to load document: $e';
+        Get.snackbar(
+          'Error',
+          'Could not load document: $e',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
     }
   }
 
@@ -127,18 +160,23 @@ class SigningController extends GetxController {
   }
 
   void onFieldTap(SignatureFieldModel field) {
+    hasStarted.value = true;
     switch (field.type) {
       case SignatureFieldType.signature:
       case SignatureFieldType.initials:
         if (field.value != null) {
-          Get.bottomSheet(
-            SigningActionMenu(
-              onChange: () => _openSigningModal(field),
-              onRemove: () => _removeSignature(field),
-            ),
-          );
+          if (Get.width > 900) {
+            activeFieldActionFieldId.value = field.fieldId;
+          } else {
+            Get.bottomSheet(
+              SigningActionMenu(
+                onChange: () => openSigningModal(field),
+                onRemove: () => removeSignature(field),
+              ),
+            );
+          }
         } else {
-          _openSigningModal(field);
+          openSigningModal(field);
         }
         break;
       case SignatureFieldType.dateSigned:
@@ -194,11 +232,12 @@ class SigningController extends GetxController {
     );
   }
 
-  void _openSigningModal(SignatureFieldModel field) {
+  void openSigningModal(SignatureFieldModel field) {
     Get.dialog(
       AdoptAndSignModal(
         initialName: 'Ricardo',
         initialInitials: 'D.',
+        fieldType: field.type,
         onAdopt: (Uint8List? signature, name, initials) {
           _applySignature(field, signature);
           Get.back();
@@ -210,30 +249,164 @@ class SigningController extends GetxController {
   void _applySignature(SignatureFieldModel field, dynamic value) {
     final index = fields.indexWhere((f) => f.fieldId == field.fieldId);
     if (index != -1) {
-      fields[index] = fields[index].copyWith(value: value);
+      fields[index] = fields[index].copyWith(value: value, clearValue: value == null);
+      fields.refresh();
+      _updateActiveField(); // Advance the indicator
+      
+      // Auto-move to next field or finish button
+      Future.delayed(const Duration(milliseconds: 400), () => scrollToNextField());
     }
   }
 
-  void _removeSignature(SignatureFieldModel field) {
+  void _updateActiveField() {
+    final next = fields.firstWhereOrNull((f) => f.value == null);
+    activeFieldId.value = next?.fieldId;
+    
+    // Aligns the tab to the new active field immediately in the UI
+    if (next != null) {
+      _alignTabToField(next.fieldId);
+    } else {
+      _alignTabToKey(bottomFinishButtonKey);
+    }
+  }
+
+  /// Create a GlobalKey for every field so we can locate them in the scroll view.
+  void _initFieldKeys() {
+    fieldKeys.clear();
+    for (final field in fields) {
+      fieldKeys[field.fieldId] = GlobalKey(debugLabel: 'field_${field.fieldId}');
+    }
+  }
+
+  /// Auto-fill all dateSigned fields with today's date.
+  void _autoFillDateFields() {
+    final today = DateFormat('MM/dd/yyyy').format(DateTime.now());
+    for (int i = 0; i < fields.length; i++) {
+      if (fields[i].type == SignatureFieldType.dateSigned && fields[i].value == null) {
+        fields[i] = fields[i].copyWith(value: today);
+      }
+    }
+  }
+
+  void removeSignature(SignatureFieldModel field) {
     final index = fields.indexWhere((f) => f.fieldId == field.fieldId);
     if (index != -1) {
-      fields[index] = fields[index].copyWith(value: null);
+      fields[index] = fields[index].copyWith(clearValue: true);
+      fields.refresh();
+      _updateActiveField(); // Jump pointer back to this or earlier unfilled field
     }
   }
 
-  void scrollToNextField() {
+  /// Scroll to the next pending field using GlobalKey-based positioning.
+  /// After scrolling, aligns the navigation tab to the field's viewport Y.
+  Future<void> scrollToNextField() async {
+    hasStarted.value = true;
     final nextField = fields.firstWhereOrNull((f) => f.value == null);
-    if (nextField != null && scrollController.hasClients) {
-      // nextField.page is 0-indexed from Firestore
-      const double estimatedPageHeight = 1050.0; 
-      final double targetOffset = nextField.page * estimatedPageHeight;
-      
-      scrollController.animateTo(
-        targetOffset.clamp(0.0, scrollController.position.maxScrollExtent),
-        duration: const Duration(milliseconds: 600),
-        curve: Curves.easeInOutQuart,
-      );
+    final GlobalKey? key;
+    final String? fieldId;
+
+    if (nextField != null) {
+      key = fieldKeys[nextField.fieldId];
+      fieldId = nextField.fieldId;
+    } else {
+      // All fields done? Target the bottom finish button
+      key = bottomFinishButtonKey;
+      fieldId = null;
     }
+
+    if (key?.currentContext != null) {
+      // Widget is already built – use ensureVisible for precise scroll
+      await Scrollable.ensureVisible(
+        key!.currentContext!,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeOutCubic,
+        alignment: 0.35, // place ~35% from top of viewport
+      );
+    } else if (scrollController.hasClients) {
+      // Widget not yet built (off-screen) – estimate offset to bring page into view
+      final double targetOffset;
+      if (nextField != null) {
+        const double estimatedPageHeight = 1050.0;
+        targetOffset = nextField.page * estimatedPageHeight;
+      } else {
+        // Go straight to the end
+        targetOffset = scrollController.position.maxScrollExtent;
+      }
+      
+      await scrollController.animateTo(
+        targetOffset.clamp(0.0, scrollController.position.maxScrollExtent),
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeOutCubic,
+      );
+      // Wait for the page to build, then fine-tune
+      await Future.delayed(const Duration(milliseconds: 150));
+      if (key?.currentContext != null) {
+        await Scrollable.ensureVisible(
+          key!.currentContext!,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutCubic,
+          alignment: 0.35,
+        );
+      }
+    }
+
+    // Align the navigation tab to the target after scroll completes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (fieldId != null) {
+        _alignTabToField(fieldId);
+      } else {
+        _alignTabToKey(bottomFinishButtonKey);
+      }
+    });
+  }
+
+  /// Helper to align the tab to a specific GlobalKey (like the bottom button or a field)
+  void _alignTabToKey(GlobalKey targetKey) {
+    final targetContext = targetKey.currentContext;
+    final docContext = documentAreaKey.currentContext;
+    if (targetContext == null || docContext == null) return;
+
+    final RenderBox targetBox = targetContext.findRenderObject() as RenderBox;
+    final RenderBox docBox = docContext.findRenderObject() as RenderBox;
+    
+    // Find the page container - the target is inside a Stack/Container representing the page
+    RenderBox? pageBox;
+    targetContext.visitAncestorElements((element) {
+      if (element.widget is Stack || element.widget is Container) {
+        final box = element.findRenderObject();
+        if (box is RenderBox && box.size.width > targetBox.size.width * 2) {
+          pageBox = box;
+          return false;
+        }
+      }
+      return true;
+    });
+
+    final targetGlobal = targetBox.localToGlobal(Offset.zero);
+    final docGlobal = docBox.localToGlobal(Offset.zero);
+    final pageGlobal = pageBox?.localToGlobal(Offset.zero) ?? targetGlobal;
+
+    final double relativeTop = targetGlobal.dy - docGlobal.dy;
+    final double relativeLeft = pageGlobal.dx - docGlobal.dx;
+    
+    const double tabHeight = 44.0;
+    // We'll estimate tab width or keep it fixed for margin calculation
+    // "Start" is roughly 80-100px with padding, arrows are ~60-80px
+    final double tabWidth = hasStarted.value ? 70.0 : 90.0; 
+
+    guidanceTabTop.value = (relativeTop + (targetBox.size.height / 2) - (tabHeight / 2))
+        .clamp(0.0, docBox.size.height - tabHeight);
+        
+    // Flush with document edge
+    guidanceTabLeft.value = (relativeLeft - tabWidth).clamp(-tabWidth, docBox.size.width);
+  }
+
+  /// Compute the field's position relative to the document area viewport
+  /// and update [guidanceTabTop]/[guidanceTabLeft] so the navigation tab stays flush.
+  void _alignTabToField(String fieldId) {
+    final key = fieldKeys[fieldId];
+    if (key == null) return;
+    _alignTabToKey(key);
   }
 
   void jumpToPage(int pageNumber) {
@@ -305,12 +478,19 @@ class SigningController extends GetxController {
         signatureData: signatureData,
       );
 
-      // Simulate local PDF processing (UI feedback)
-      await Future.delayed(const Duration(seconds: 1));
+      // Simulate the backend processing (flattening PDF, updating status)
+      // to give the user a sense of "work being done" as per reference.
+      await Future.delayed(const Duration(seconds: 2));
 
       Get.dialog(const SuccessModal(), barrierDismissible: false);
     } catch (e) {
-      Get.snackbar('Error', 'Failed to process document');
+      Get.snackbar(
+        'Submission Error',
+        'We couldn\'t process your signatures. Please try again.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.error,
+        colorText: Colors.white,
+      );
     } finally {
       isLoading.value = false;
     }
@@ -350,12 +530,16 @@ class SigningController extends GetxController {
         fields: fields,
       );
 
-      final blob = html.Blob([mergedBytes], 'application/pdf');
-      final url = html.Url.createObjectUrlFromBlob(blob);
-      html.AnchorElement(href: url)
-        ..setAttribute("download", "signed_document.pdf")
-        ..click();
-      html.Url.revokeObjectUrl(url);
+      final blob = web.Blob(
+        [mergedBytes.toJS].toJS,
+        web.BlobPropertyBag(type: 'application/pdf'),
+      );
+      final url = web.URL.createObjectURL(blob);
+      final anchor = web.HTMLAnchorElement()
+        ..href = url
+        ..download = "signed_document.pdf";
+      anchor.click();
+      web.URL.revokeObjectURL(url);
 
       Get.snackbar(
         'Success',
@@ -368,6 +552,30 @@ class SigningController extends GetxController {
       Get.snackbar(
         'Error',
         'Failed to generate PDF: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
+  }
+
+  Future<void> resendLink() async {
+    try {
+      // In a real app, call: await _documentProvider.resendSigningLink(token.value);
+      await Future.delayed(const Duration(seconds: 1));
+      
+      Get.snackbar(
+        'Link Sent',
+        'A new signing link has been sent to your email address. Please check your inbox.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 4),
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Failed to send new link: $e',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,

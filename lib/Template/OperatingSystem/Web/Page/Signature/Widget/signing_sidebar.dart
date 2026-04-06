@@ -36,6 +36,11 @@ class SigningSidebar extends StatelessWidget {
             label: 'Download',
             onTap: () => controller.togglePopover('download'),
           ),
+          _SidebarTool(
+            icon: Icons.print_outlined,
+            label: 'Print',
+            onTap: () {}, // Implementation placeholder
+          ),
           const Spacer(),
           _SidebarTool(
             icon: Icons.zoom_in,
@@ -47,10 +52,10 @@ class SigningSidebar extends StatelessWidget {
             child: Obx(
               () => Text(
                 '${(controller.zoomLevel.value * 100).toInt()}%',
-                style: const TextStyle(
-                  fontSize: 12,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   color: AppColors.primary,
                   fontWeight: FontWeight.bold,
+                  fontSize: 10.sp,
                 ),
               ),
             ),
@@ -75,7 +80,7 @@ class MobileBottomBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 60.h,
+      height: 64, // Fixed height for mobile bottom bar
       decoration: const BoxDecoration(
         color: Colors.white,
         border: Border(top: BorderSide(color: AppColors.borderLight)),
@@ -101,7 +106,7 @@ class MobileBottomBar extends StatelessWidget {
           _MobileTool(
             icon: Icons.more_horiz,
             label: 'More',
-            onTap: () => _showMobileMoreActions(),
+            onTap: () => _showMobileMoreActions(context),
           ),
         ],
       ),
@@ -158,7 +163,7 @@ class MobileBottomBar extends StatelessWidget {
     );
   }
 
-  void _showMobileMoreActions() {
+  void _showMobileMoreActions(BuildContext context) {
     Get.bottomSheet(
       Container(
         padding: EdgeInsets.all(24.w),
@@ -174,12 +179,18 @@ class MobileBottomBar extends StatelessWidget {
           children: [
             ListTile(
               leading: const Icon(Icons.info_outline),
-              title: const Text('Help & Support'),
+              title: Text(
+                'Help & Support',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
               onTap: () => Get.back(),
             ),
             ListTile(
               leading: const Icon(Icons.description_outlined),
-              title: const Text('About Scrivener'),
+              title: Text(
+                'About Scrivener',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
               onTap: () => Get.back(),
             ),
             SizedBox(height: 20.h),
@@ -211,7 +222,11 @@ class _SidebarTool extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 label,
-                style: const TextStyle(fontSize: 11, color: AppColors.primary),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: AppColors.primary,
+                  fontSize: 9.sp,
+                  fontWeight: FontWeight.w500,
+                ),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -238,18 +253,17 @@ class _MobileTool extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: AppColors.textSecondary, size: 20),
+            Icon(icon, color: AppColors.textSecondary, size: 22),
             const SizedBox(height: 2),
             Text(
               label,
-              style: const TextStyle(
-                fontSize: 10,
-                color: AppColors.textSecondary,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
             ),
           ],
         ),

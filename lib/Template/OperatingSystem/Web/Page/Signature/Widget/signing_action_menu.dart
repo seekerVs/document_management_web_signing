@@ -106,11 +106,14 @@ class _ActionItemState extends State<_ActionItem> {
               duration: const Duration(milliseconds: 150),
               child: Text(
                 widget.label,
-                style: TextStyle(
-                  color: widget.isDestructive ? Colors.red : AppColors.textPrimary,
-                  fontSize: 18,
-                  fontWeight: widget.isBold || widget.isDestructive ? FontWeight.bold : FontWeight.w500,
-                ),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: widget.isDestructive
+                          ? AppColors.error
+                          : AppColors.textPrimary,
+                      fontWeight: widget.isBold || widget.isDestructive
+                          ? FontWeight.bold
+                          : FontWeight.w500,
+                    ),
               ),
             ),
           ),

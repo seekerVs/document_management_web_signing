@@ -62,6 +62,7 @@ class SignatureFieldModel {
     double? height,
     bool? isRequired,
     dynamic value,
+    bool clearValue = false,
   }) {
     return SignatureFieldModel(
       fieldId: fieldId,
@@ -72,7 +73,7 @@ class SignatureFieldModel {
       width: width ?? this.width,
       height: height ?? this.height,
       isRequired: isRequired ?? this.isRequired,
-      value: value ?? this.value,
+      value: clearValue ? null : (value ?? this.value),
     );
   }
 }

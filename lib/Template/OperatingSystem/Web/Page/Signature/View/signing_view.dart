@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../../Utils/Constant/colors.dart';
+import '../../../../../Utils/Constant/style.dart';
 import '../Controller/signing_controller.dart';
 import '../Widget/signing_header.dart';
 import '../Widget/pdf_document_viewer.dart';
 import '../Widget/signing_sidebar.dart';
-import '../Widget/guidance_button.dart';
 import '../Widget/sidebar_popovers.dart';
+import '../Widget/signing_footer.dart';
+import '../Widget/guidance_button.dart';
 
 class SigningView extends GetView<SigningController> {
   const SigningView({super.key});
@@ -31,7 +33,7 @@ class SigningView extends GetView<SigningController> {
               ],
             ),
           ),
-          if (context.width <= 900) MobileBottomBar(controller: controller),
+          const SigningFooter(),
         ],
       ),
     );
@@ -39,34 +41,35 @@ class SigningView extends GetView<SigningController> {
 
   Widget _buildDocumentArea(BuildContext context) {
     return Container(
+      key: controller.documentAreaKey,
       color: AppColors.backgroundLight,
       child: Obx(() {
         if (controller.isLoading.value) {
-          return _buildLoadingSkeleton();
+          return _buildLoadingSkeleton(context);
         }
 
         if (controller.error.value.isNotEmpty) {
-          return _buildErrorState();
+          return _buildErrorState(context);
         }
+
+        // Read reactive values so Obx rebuilds on change
+        final double tabTop = controller.guidanceTabTop.value;
+        final double tabLeft = controller.guidanceTabLeft.value;
 
         return Stack(
           children: [
-            Center(
-              child: Container(
-                constraints: BoxConstraints(
-                  maxWidth: context.width <= 900 ? double.infinity : 850,
-                ),
-                width: double.infinity,
-                color: AppColors.backgroundLight,
-                child: PdfDocumentViewer(controller: controller),
-              ),
+            Container(
+              width: double.infinity,
+              color: AppColors.backgroundLight,
+              child: PdfDocumentViewer(controller: controller),
             ),
-            // Floating Guidance Button
-            Positioned(
-              bottom: 40,
-              left: 0,
-              right: 0,
-              child: Center(child: GuidanceButton(controller: controller)),
+            // Floating Navigation Tab with animated vertical/horizontal alignment
+            AnimatedPositioned(
+              duration: const Duration(milliseconds: 400),
+              curve: Curves.easeOutCubic,
+              left: tabLeft,
+              top: tabTop,
+              child: NavigationTab(controller: controller),
             ),
           ],
         );
@@ -110,77 +113,87 @@ class SigningView extends GetView<SigningController> {
     });
   }
 
-  Widget _buildErrorState() {
+  Widget _buildErrorState(BuildContext context) {
     return Center(
       child: Container(
         padding: const EdgeInsets.all(32),
         constraints: const BoxConstraints(maxWidth: 400),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
+        decoration: AppStyle.card(radius: 8).copyWith(
           boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 10)],
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.error_outline, color: Colors.red, size: 48),
-            const SizedBox(height: 16),
-            const Text(
-              'Unable to load document',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primary,
+        child: Obx(() {
+          final isExpired = controller.isLinkExpired.value;
+          final title = isExpired ? 'Link Expired' : 'Unable to load document';
+          final message = isExpired
+              ? 'The signing link you clicked is no longer valid for security reasons. Please request a new link.'
+              : controller.error.value;
+          final icon = isExpired ? Icons.timer_off_outlined : Icons.error_outline;
+
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: AppColors.error, size: 48),
+              const SizedBox(height: 16),
+              Text(
+                title,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: AppColors.error,
+                    ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Obx(
-              () => Text(
-                controller.error.value,
+              const SizedBox(height: 8),
+              Text(
+                message,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: AppColors.textSecondary,
-                ),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
               ),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () => controller.onInit(),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 32,
-                  vertical: 12,
-                ),
+              const SizedBox(height: 24),
+              isExpired
+                  ? ElevatedButton(
+                      onPressed: () => controller.resendLink(),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 12,
+                        ),
+                      ),
+                      child: const Text('Send New Link'),
+                    )
+                  : ElevatedButton(
+                      onPressed: () => controller.onInit(),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 12,
+                        ),
+                      ),
+                      child: const Text('Retry'),
+                    ),
+              const SizedBox(height: 12),
+              TextButton(
+                onPressed: () => Get.offAllNamed('/'),
+                child: const Text('Back to Home'),
               ),
-              child: const Text('Retry'),
-            ),
-            const SizedBox(height: 12),
-            TextButton(
-              onPressed: () => Get.offAllNamed('/'),
-              child: const Text('Back to Home'),
-            ),
-          ],
-        ),
+            ],
+          );
+        }),
       ),
     );
   }
 
-  Widget _buildLoadingSkeleton() {
+  Widget _buildLoadingSkeleton(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const CircularProgressIndicator(),
           const SizedBox(height: 24),
-          const Text(
+          Text(
             'Verifying secure token & fetching document...',
-            style: TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
           ),
         ],
       ),

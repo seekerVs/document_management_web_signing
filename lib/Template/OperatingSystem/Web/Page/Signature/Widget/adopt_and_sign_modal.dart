@@ -5,7 +5,9 @@ import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:signature/signature.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../../Commons/Styles/style.dart';
 import '../../../../../Utils/Constant/colors.dart';
+import '../../../../../Utils/Constant/enum.dart';
 import 'AdoptAndSign/draw_signature_tab.dart';
 import 'AdoptAndSign/signature_preview_frame.dart';
 import 'AdoptAndSign/upload_signature_tab.dart';
@@ -13,12 +15,14 @@ import 'AdoptAndSign/upload_signature_tab.dart';
 class AdoptAndSignModal extends StatefulWidget {
   final String initialName;
   final String initialInitials;
+  final SignatureFieldType fieldType;
   final Function(Uint8List? signature, String name, String initials) onAdopt;
 
   const AdoptAndSignModal({
     super.key,
     required this.initialName,
     required this.initialInitials,
+    required this.fieldType,
     required this.onAdopt,
   });
 
@@ -60,65 +64,76 @@ class _AdoptAndSignModalState extends State<AdoptAndSignModal>
 
   @override
   Widget build(BuildContext context) {
+    final bool isMobile = context.width <= 900;
     return Dialog(
       backgroundColor: Colors.transparent,
       elevation: 0,
-      insetPadding: EdgeInsets.all(24.w),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Main Content
-          Container(
-            width: 600.w,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: _showStyles
-                  ? BorderRadius.horizontal(left: Radius.circular(8.r))
-                  : BorderRadius.circular(8.r),
-              boxShadow: const [
-                BoxShadow(color: Colors.black26, blurRadius: 10),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(),
-                Expanded(
-                  child: SingleChildScrollView(
+      insetPadding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 12 : 24.w,
+        vertical: isMobile ? 32 : 24.h,
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Main Content
+            Container(
+              width: isMobile ? context.width - 24 : 600.w,
+              decoration: AppStyle.card(radius: _showStyles ? 0 : 8.r).copyWith(
+                borderRadius: _showStyles
+                    ? BorderRadius.horizontal(left: Radius.circular(8.r))
+                    : BorderRadius.circular(8.r),
+                boxShadow: const [
+                  BoxShadow(color: Colors.black26, blurRadius: 10),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(),
+                  SingleChildScrollView(
                     child: Padding(
-                      padding: EdgeInsets.all(24.w),
+                      padding: EdgeInsets.all(isMobile ? 16 : 24.w),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Confirm your name, initials, and signature.',
-                            style: TextStyle(
-                              color: AppColors.primary,
-                              fontSize: 14.sp,
-                            ),
-                          ),
-                          SizedBox(height: 24.h),
                           Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Expanded(
-                                flex: 2,
-                                child: _buildInput(
-                                  'Full Name *',
-                                  _nameController,
+                                flex: 3,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _buildFieldLabel('Full Name'),
+                                    SizedBox(height: 6.h),
+                                    _buildTextField(
+                                      controller: _nameController,
+                                      hintText: 'Full Name',
+                                    ),
+                                  ],
                                 ),
                               ),
                               SizedBox(width: 16.w),
                               Expanded(
-                                child: _buildInput(
-                                  'Initials *',
-                                  _initialsController,
+                                flex: 1,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _buildFieldLabel('Initials'),
+                                    SizedBox(height: 6.h),
+                                    _buildTextField(
+                                      controller: _initialsController,
+                                      hintText: 'Initials',
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
                           ),
-                          SizedBox(height: 32.h),
+                          SizedBox(height: 24.h),
                           _buildTabs(),
                           SizedBox(
                             height: 200.h,
@@ -133,15 +148,16 @@ class _AdoptAndSignModalState extends State<AdoptAndSignModal>
                               ],
                             ),
                           ),
-                          SizedBox(height: 32.h),
-                          const Text(
+                          SizedBox(height: 16.h),
+                          Text(
                             'By selecting Adopt and Sign, I agree that the signature and initials will be the electronic representation of my signature and initials for all purposes when I (or my agent) use them on documents, including legally binding contracts.',
-                            style: TextStyle(
-                              color: AppColors.textSecondary,
-                              fontSize: 11,
-                            ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 9.sp,
+                                ),
                           ),
-                          SizedBox(height: 24.h),
+                          SizedBox(height: 16.h),
                           Row(
                             children: [
                               ValueListenableBuilder<TextEditingValue>(
@@ -156,9 +172,7 @@ class _AdoptAndSignModalState extends State<AdoptAndSignModal>
                                           nameVal.text.isNotEmpty &&
                                           initialsVal.text.isNotEmpty;
                                       return ElevatedButton(
-                                        onPressed: isEnabled
-                                            ? _handleAdopt
-                                            : null,
+                                        onPressed: isEnabled ? _handleAdopt : null,
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: AppColors.primary,
                                           padding: EdgeInsets.symmetric(
@@ -173,11 +187,10 @@ class _AdoptAndSignModalState extends State<AdoptAndSignModal>
                                         ),
                                         child: Text(
                                           'Adopt and Sign',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 14.sp,
-                                          ),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .labelLarge
+                                              ?.copyWith(color: Colors.white),
                                         ),
                                       );
                                     },
@@ -188,7 +201,6 @@ class _AdoptAndSignModalState extends State<AdoptAndSignModal>
                               TextButton(
                                 onPressed: () => Get.back(),
                                 style: TextButton.styleFrom(
-                                  backgroundColor: AppColors.backgroundLight,
                                   padding: EdgeInsets.symmetric(
                                     horizontal: 24.w,
                                     vertical: 16.h,
@@ -199,11 +211,11 @@ class _AdoptAndSignModalState extends State<AdoptAndSignModal>
                                 ),
                                 child: Text(
                                   'Cancel',
-                                  style: TextStyle(
-                                    color: AppColors.primary,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14.sp,
-                                  ),
+                                  style: Theme.of(context).textTheme.labelLarge
+                                      ?.copyWith(
+                                        color: AppColors.primary,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                 ),
                               ),
                             ],
@@ -212,36 +224,35 @@ class _AdoptAndSignModalState extends State<AdoptAndSignModal>
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          // Style Panel
-          if (_showStyles)
-            Container(
-              width: 300.w,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.horizontal(
-                  right: Radius.circular(8.r),
-                ),
-                border: const Border(
-                  left: BorderSide(color: AppColors.borderLight),
-                ),
-                boxShadow: const [
-                  BoxShadow(color: Colors.black26, blurRadius: 10),
                 ],
               ),
-              child: _buildStyleSelector(),
             ),
-        ],
+            // Style Panel
+            if (_showStyles)
+              Container(
+                width: 300.w,
+                decoration: AppStyle.card(radius: 0).copyWith(
+                  borderRadius: BorderRadius.horizontal(
+                    right: Radius.circular(8.r),
+                  ),
+                  border: const Border(
+                    left: BorderSide(color: AppColors.borderLight),
+                  ),
+                  boxShadow: const [
+                    BoxShadow(color: Colors.black26, blurRadius: 10),
+                  ],
+                ),
+                child: _buildStyleSelector(),
+              ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildHeader() {
     return Container(
-      padding: EdgeInsets.all(24.w),
+      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
       decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: AppColors.borderLight)),
       ),
@@ -250,8 +261,7 @@ class _AdoptAndSignModalState extends State<AdoptAndSignModal>
         children: [
           Text(
             'Adopt Your Signature',
-            style: TextStyle(
-              fontSize: 18.sp,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
               color: AppColors.primary,
             ),
@@ -269,55 +279,52 @@ class _AdoptAndSignModalState extends State<AdoptAndSignModal>
     );
   }
 
-  Widget _buildInput(String label, TextEditingController controller) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Text(
-              label.replaceAll(' *', ''),
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 12.sp,
-                color: AppColors.primary,
-              ),
-            ),
-            if (label.contains('*'))
-              Text(
-                ' *',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-          ],
-        ),
-        SizedBox(height: 8.h),
-        TextField(
-          controller: controller,
-          decoration: InputDecoration(
-            isDense: true,
-            contentPadding: EdgeInsets.symmetric(
-              horizontal: 12.w,
-              vertical: 12.h,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(4.r),
-              borderSide: BorderSide(color: AppColors.borderLight),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(4.r),
-              borderSide: BorderSide(color: AppColors.borderLight),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(4.r),
-              borderSide: BorderSide(color: AppColors.primary),
+  Widget _buildFieldLabel(String label) {
+    return RichText(
+      text: TextSpan(
+        children: [
+          TextSpan(
+            text: label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
             ),
           ),
+          const TextSpan(
+            text: ' *',
+            style: TextStyle(color: AppColors.error),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hintText,
+  }) {
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        isDense: true,
+        hintText: hintText,
+        hintStyle: Theme.of(
+          context,
+        ).textTheme.bodyMedium?.copyWith(color: AppColors.textHint),
+        contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(4.r),
+          borderSide: BorderSide(color: AppColors.borderLight),
         ),
-      ],
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(4.r),
+          borderSide: BorderSide(color: AppColors.borderLight),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(4.r),
+          borderSide: BorderSide(color: AppColors.primary, width: 1),
+        ),
+      ),
     );
   }
 
@@ -334,11 +341,12 @@ class _AdoptAndSignModalState extends State<AdoptAndSignModal>
         unselectedLabelColor: AppColors.textSecondary,
         indicatorColor: AppColors.primary,
         indicatorSize: TabBarIndicatorSize.label,
-        labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.sp),
-        unselectedLabelStyle: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 13.sp,
-        ),
+        labelStyle: Theme.of(
+          context,
+        ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold),
+        unselectedLabelStyle: Theme.of(
+          context,
+        ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold),
         tabs: const [
           Tab(text: 'SELECT STYLE'),
           Tab(text: 'DRAW'),
@@ -357,7 +365,9 @@ class _AdoptAndSignModalState extends State<AdoptAndSignModal>
           children: [
             Text(
               'PREVIEW',
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 12.sp),
+              style: Theme.of(
+                context,
+              ).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
             ),
             InkWell(
               onTap: () {
@@ -367,7 +377,10 @@ class _AdoptAndSignModalState extends State<AdoptAndSignModal>
               },
               child: Text(
                 'Change Style',
-                style: TextStyle(color: AppColors.primary, fontSize: 12.sp),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],
@@ -375,24 +388,19 @@ class _AdoptAndSignModalState extends State<AdoptAndSignModal>
         SizedBox(height: 8.h),
         Container(
           padding: EdgeInsets.all(16.w),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: AppColors.borderLight),
-            borderRadius: BorderRadius.circular(8.r),
-          ),
+          decoration: AppStyle.card(radius: 8.r),
           child: ValueListenableBuilder<TextEditingValue>(
             valueListenable: _nameController,
             builder: (context, nameValue, child) {
               return ValueListenableBuilder<TextEditingValue>(
                 valueListenable: _initialsController,
                 builder: (context, initialValue, child) {
-                  return RepaintBoundary(
-                    key: _previewKey,
-                    child: SignaturePreviewFrame(
-                      name: nameValue.text,
-                      initials: initialValue.text,
-                      font: _selectedFont,
-                    ),
+                  return SignaturePreviewFrame(
+                    name: nameValue.text,
+                    initials: initialValue.text,
+                    font: _selectedFont,
+                    fieldType: widget.fieldType,
+                    captureKey: _previewKey,
                   );
                 },
               );
@@ -430,19 +438,18 @@ class _AdoptAndSignModalState extends State<AdoptAndSignModal>
                 },
                 child: Container(
                   padding: EdgeInsets.all(12.w),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
+                  decoration: AppStyle.card(radius: 8.r).copyWith(
                     border: Border.all(
                       color: _selectedFont == mockFonts[index]
                           ? AppColors.primary
                           : AppColors.borderLight,
                     ),
-                    borderRadius: BorderRadius.circular(8.r),
                   ),
                   child: SignaturePreviewFrame(
                     name: _nameController.text,
                     initials: _initialsController.text,
                     font: mockFonts[index],
+                    fieldType: widget.fieldType,
                   ),
                 ),
               );

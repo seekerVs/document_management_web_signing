@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:pdfx/pdfx.dart';
 import '../Controller/signing_controller.dart';
 import 'signature_field_guest_overlay.dart';
+import '../../../../../Utils/Constant/colors.dart';
 
 class PdfDocumentViewer extends StatelessWidget {
   final SigningController controller;
@@ -12,26 +13,67 @@ class PdfDocumentViewer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InteractiveViewer(
-      transformationController: controller.transformationController,
-      onInteractionUpdate: controller.onInteractionUpdate,
-      minScale: 1.0,
-      maxScale: 3.0,
-      child: ListView.builder(
-        controller: controller.scrollController,
-        padding: EdgeInsets.symmetric(
-          vertical: context.width <= 900 ? 10 : 40,
-          horizontal: context.width <= 900 ? 10 : 20,
+    final bool isDesktop = context.width > 900;
+    return GestureDetector(
+      onTap: () => controller.activeFieldActionFieldId.value = null,
+      child: InteractiveViewer(
+        transformationController: controller.transformationController,
+        onInteractionUpdate: controller.onInteractionUpdate,
+        minScale: 1.0,
+        maxScale: 3.0,
+        scaleEnabled: !isDesktop,
+        child: ListView.builder(
+          controller: controller.scrollController,
+          padding: EdgeInsets.symmetric(
+            vertical: context.width <= 900 ? 10 : 40,
+            horizontal: context.width <= 900
+                ? 50
+                : 80, // Added padding for the left gutter indicator
+          ),
+          itemCount: (controller.pdfDocument?.pagesCount ?? 0) + 1,
+          itemBuilder: (context, index) {
+            if (controller.pdfDocument != null &&
+                index == controller.pdfDocument!.pagesCount) {
+              return _buildBottomFinishButton(context);
+            }
+            return _PdfPageWebWidget(
+              pageIndex: index + 1,
+              controller: controller,
+            );
+          },
         ),
-        itemCount: controller.pdfDocument?.pagesCount ?? 0,
-        itemBuilder: (context, index) {
-          return _PdfPageWebWidget(
-            pageIndex: index + 1,
-            controller: controller,
-          );
-        },
       ),
     );
+  }
+
+  Widget _buildBottomFinishButton(BuildContext context) {
+    return Obx(() {
+      final bool allDone =
+          controller.fields.isNotEmpty &&
+          controller.fields.every((f) => f.value != null);
+      if (!allDone) return const SizedBox(height: 100);
+
+      return Container(
+        padding: const EdgeInsets.symmetric(vertical: 40),
+        alignment: Alignment.topCenter,
+        child: ElevatedButton(
+          key: controller.bottomFinishButtonKey,
+          onPressed: controller.finishSigning,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          child: const Text(
+            'Finish',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+        ),
+      );
+    });
   }
 }
 
@@ -87,10 +129,14 @@ class _PdfPageWebWidgetState extends State<_PdfPageWebWidget> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final double displayW = constraints.maxWidth;
+        final double maxAllowedWidth = context.width <= 900
+            ? double.infinity
+            : 850.0;
+        final double displayW = constraints.maxWidth > maxAllowedWidth
+            ? maxAllowedWidth
+            : constraints.maxWidth;
         final double displayH =
             displayW * (_pageSize!.height / _pageSize!.width);
-        final double scale = displayW / _pageSize!.width;
 
         return Center(
           child: Container(
@@ -113,6 +159,8 @@ class _PdfPageWebWidgetState extends State<_PdfPageWebWidget> {
                   .toList();
 
               return Stack(
+                clipBehavior:
+                    Clip.none, // Allow indicator to float in the gutter
                 children: [
                   Positioned.fill(
                     child: Image.memory(_imageBytes!, fit: BoxFit.fill),
@@ -122,6 +170,11 @@ class _PdfPageWebWidgetState extends State<_PdfPageWebWidget> {
                       field: field,
                       pageWidth: displayW,
                       pageHeight: displayH,
+                      fieldKey: widget.controller.fieldKeys[field.fieldId],
+                      isActive:
+                          widget.controller.activeFieldId.value ==
+                          field.fieldId,
+                      hasStarted: widget.controller.hasStarted.value,
                       onTap: () => widget.controller.onFieldTap(field),
                     ),
                   ),

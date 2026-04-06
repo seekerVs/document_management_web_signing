@@ -34,7 +34,13 @@ class UploadSignatureTab extends StatelessWidget {
                 side: const BorderSide(color: AppColors.borderLight),
                 shadowColor: Colors.transparent,
               ),
-              child: const Text('UPLOAD YOUR SIGNATURE'),
+              child: Text(
+                'UPLOAD YOUR SIGNATURE',
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
             ),
           ],
         ),
