@@ -49,7 +49,7 @@ class SuccessModal extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Log in to Scrivener',
+                        'Signing Complete',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: AppColors.primary,
@@ -69,7 +69,7 @@ class SuccessModal extends StatelessWidget {
                   padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
                   color: AppColors.backgroundLight,
                   child: Text(
-                    'A copy of this document has been saved to your Scrivener account. Please log in to view it.',
+                    'A copy of this signed document will be sent to your email address shortly.',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -95,47 +95,24 @@ class SuccessModal extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: 32.h),
-                      Row(
-                        children: [
-                          ElevatedButton(
-                            onPressed: () {
-                              Get.offAllNamed('/');
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFFFC107), // Yellow button
-                              foregroundColor: Colors.black,
-                              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(4.r),
-                              ),
-                            ),
-                            child: Text(
-                              'LOG IN',
-                              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1.1,
-                              ),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () {
+                            Get.back();
+                          },
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
+                          ),
+                          child: Text(
+                            'CLOSE',
+                            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.1,
                             ),
                           ),
-                          SizedBox(width: 16.w),
-                          TextButton(
-                            onPressed: () {
-                              Get.back();
-                            },
-                            style: TextButton.styleFrom(
-                              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
-                            ),
-                            child: Text(
-                              'NO THANKS',
-                              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                color: AppColors.textPrimary,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1.1,
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ],
                   ),

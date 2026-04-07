@@ -23,6 +23,7 @@ class SigningController extends GetxController {
   final RxBool isLoading = true.obs;
   final RxString error = ''.obs;
   final RxBool isLinkExpired = false.obs;
+  final RxBool isLinkResent = false.obs;
   final RxString token = ''.obs;
   final RxString activePopover = ''.obs;
   final RxList<SignatureFieldModel> fields = <SignatureFieldModel>[].obs;
@@ -35,7 +36,9 @@ class SigningController extends GetxController {
 
   // ── Navigation Tab tracking ──
   final Map<String, GlobalKey> fieldKeys = {};
-  final GlobalKey bottomFinishButtonKey = GlobalKey(debugLabel: 'bottomFinishButton');
+  final GlobalKey bottomFinishButtonKey = GlobalKey(
+    debugLabel: 'bottomFinishButton',
+  );
   final RxDouble guidanceTabTop = 100.0.obs;
   final RxDouble guidanceTabLeft = 0.0.obs;
   final GlobalKey documentAreaKey = GlobalKey(debugLabel: 'documentArea');
@@ -105,7 +108,9 @@ class SigningController extends GetxController {
       // Filter fields for the current guest signer matching the token's email
       if (request.targetSignerEmail != null) {
         final currentSigner = request.signers.firstWhereOrNull(
-          (s) => s.signerEmail.toLowerCase() == request.targetSignerEmail!.toLowerCase()
+          (s) =>
+              s.signerEmail.toLowerCase() ==
+              request.targetSignerEmail!.toLowerCase(),
         );
         if (currentSigner != null) {
           fields.assignAll(currentSigner.fields);
@@ -122,7 +127,7 @@ class SigningController extends GetxController {
 
       // Initial active field is the first unsigned one
       _updateActiveField();
-      
+
       // Ensure tab is positioned correctly on first load
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (activeFieldId.value != null) {
@@ -249,19 +254,25 @@ class SigningController extends GetxController {
   void _applySignature(SignatureFieldModel field, dynamic value) {
     final index = fields.indexWhere((f) => f.fieldId == field.fieldId);
     if (index != -1) {
-      fields[index] = fields[index].copyWith(value: value, clearValue: value == null);
+      fields[index] = fields[index].copyWith(
+        value: value,
+        clearValue: value == null,
+      );
       fields.refresh();
       _updateActiveField(); // Advance the indicator
-      
+
       // Auto-move to next field or finish button
-      Future.delayed(const Duration(milliseconds: 400), () => scrollToNextField());
+      Future.delayed(
+        const Duration(milliseconds: 400),
+        () => scrollToNextField(),
+      );
     }
   }
 
   void _updateActiveField() {
     final next = fields.firstWhereOrNull((f) => f.value == null);
     activeFieldId.value = next?.fieldId;
-    
+
     // Aligns the tab to the new active field immediately in the UI
     if (next != null) {
       _alignTabToField(next.fieldId);
@@ -274,7 +285,9 @@ class SigningController extends GetxController {
   void _initFieldKeys() {
     fieldKeys.clear();
     for (final field in fields) {
-      fieldKeys[field.fieldId] = GlobalKey(debugLabel: 'field_${field.fieldId}');
+      fieldKeys[field.fieldId] = GlobalKey(
+        debugLabel: 'field_${field.fieldId}',
+      );
     }
   }
 
@@ -282,7 +295,8 @@ class SigningController extends GetxController {
   void _autoFillDateFields() {
     final today = DateFormat('MM/dd/yyyy').format(DateTime.now());
     for (int i = 0; i < fields.length; i++) {
-      if (fields[i].type == SignatureFieldType.dateSigned && fields[i].value == null) {
+      if (fields[i].type == SignatureFieldType.dateSigned &&
+          fields[i].value == null) {
         fields[i] = fields[i].copyWith(value: today);
       }
     }
@@ -332,7 +346,7 @@ class SigningController extends GetxController {
         // Go straight to the end
         targetOffset = scrollController.position.maxScrollExtent;
       }
-      
+
       await scrollController.animateTo(
         targetOffset.clamp(0.0, scrollController.position.maxScrollExtent),
         duration: const Duration(milliseconds: 500),
@@ -368,7 +382,7 @@ class SigningController extends GetxController {
 
     final RenderBox targetBox = targetContext.findRenderObject() as RenderBox;
     final RenderBox docBox = docContext.findRenderObject() as RenderBox;
-    
+
     // Find the page container - the target is inside a Stack/Container representing the page
     RenderBox? pageBox;
     targetContext.visitAncestorElements((element) {
@@ -388,17 +402,23 @@ class SigningController extends GetxController {
 
     final double relativeTop = targetGlobal.dy - docGlobal.dy;
     final double relativeLeft = pageGlobal.dx - docGlobal.dx;
-    
+
     const double tabHeight = 44.0;
     // We'll estimate tab width or keep it fixed for margin calculation
     // "Start" is roughly 80-100px with padding, arrows are ~60-80px
-    final double tabWidth = hasStarted.value ? 70.0 : 90.0; 
+    final double tabWidth = hasStarted.value ? 70.0 : 90.0;
 
-    guidanceTabTop.value = (relativeTop + (targetBox.size.height / 2) - (tabHeight / 2))
-        .clamp(0.0, docBox.size.height - tabHeight);
-        
+    guidanceTabTop.value =
+        (relativeTop + (targetBox.size.height / 2) - (tabHeight / 2)).clamp(
+          0.0,
+          docBox.size.height - tabHeight,
+        );
+
     // Flush with document edge
-    guidanceTabLeft.value = (relativeLeft - tabWidth).clamp(-tabWidth, docBox.size.width);
+    guidanceTabLeft.value = (relativeLeft - tabWidth).clamp(
+      -tabWidth,
+      docBox.size.width,
+    );
   }
 
   /// Compute the field's position relative to the document area viewport
@@ -561,8 +581,8 @@ class SigningController extends GetxController {
 
   Future<void> resendLink() async {
     try {
-      // In a real app, call: await _documentProvider.resendSigningLink(token.value);
-      await Future.delayed(const Duration(seconds: 1));
+      await _documentProvider.resendSigningLink(token.value);
+      isLinkResent.value = true;
       
       Get.snackbar(
         'Link Sent',

@@ -71,4 +71,23 @@ class DocumentProvider {
       throw Exception('Failed to submit signatures: ${response.statusCode}');
     }
   }
+
+  /// Resends a signing link to the original email
+  Future<void> resendSigningLink(String token) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/v1/guest/resend-link?token=$token'),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      String message = 'Failed to resend link: ${response.statusCode}';
+      try {
+        final Map<String, dynamic> errorData = json.decode(response.body);
+        message = errorData['message'] ?? message;
+      } catch (_) {}
+      throw Exception(message);
+    }
+  }
 }

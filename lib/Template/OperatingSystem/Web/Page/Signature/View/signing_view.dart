@@ -122,7 +122,33 @@ class SigningView extends GetView<SigningController> {
           boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 10)],
         ),
         child: Obx(() {
+          final isResent = controller.isLinkResent.value;
           final isExpired = controller.isLinkExpired.value;
+
+          if (isResent) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.check_circle_outline, color: Colors.green, size: 48),
+                const SizedBox(height: 16),
+                Text(
+                  'Link Sent',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: Colors.green,
+                      ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'A new signing link has been sent to your email address. Please check your inbox.',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                ),
+              ],
+            );
+          }
+
           final title = isExpired ? 'Link Expired' : 'Unable to load document';
           final message = isExpired
               ? 'The signing link you clicked is no longer valid for security reasons. Please request a new link.'
@@ -170,11 +196,6 @@ class SigningView extends GetView<SigningController> {
                       ),
                       child: const Text('Retry'),
                     ),
-              const SizedBox(height: 12),
-              TextButton(
-                onPressed: () => Get.offAllNamed('/'),
-                child: const Text('Back to Home'),
-              ),
             ],
           );
         }),
