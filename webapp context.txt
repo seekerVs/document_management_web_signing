@@ -14,7 +14,7 @@ assets/
   │   ├── Inter-SemiBold.ttf
   │   ├── Kameron-Bold.ttf
   │   ├── Kameron-Regular.ttf
-  │   ├── Pacifico-Regular.ttf
+  │   ├── Pacifico-Regular.ttff
   │   └── Satisfy-Regular.ttf
   ├── icons/
   └── images/

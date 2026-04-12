@@ -45,8 +45,8 @@ class NavigationTab extends StatelessWidget {
       }
 
       final bool isRect = label == 'Start';
-      final IconData icon = allDone
-          ? Icons.check_rounded
+      final IconData? icon = allDone
+          ? null
           : Icons.arrow_forward_rounded;
       final Color tabColor = allDone ? AppColors.success : AppColors.primary;
 
@@ -69,7 +69,7 @@ class NavigationTab extends StatelessWidget {
                     letterSpacing: 0.2,
                   ),
                 ),
-                if (!isRect) ...[
+                if (!isRect && icon != null) ...[
                   const SizedBox(width: 6),
                   Icon(icon, size: 16, color: Colors.white),
                 ],

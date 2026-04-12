@@ -237,11 +237,30 @@ class SigningController extends GetxController {
     );
   }
 
+  SignerModel? get currentSigner {
+    final s = session.value;
+    if (s == null || s.targetSignerEmail == null) return null;
+    return s.signers.firstWhereOrNull(
+      (signer) =>
+          signer.signerEmail.toLowerCase() == s.targetSignerEmail!.toLowerCase(),
+    );
+  }
+
   void openSigningModal(SignatureFieldModel field) {
+    final name = currentSigner?.signerName ?? '';
+    final initials =
+        name.isNotEmpty
+            ? name
+                .trim()
+                .split(RegExp(r'\s+'))
+                .map((e) => e.isNotEmpty ? e[0].toUpperCase() : '')
+                .join()
+            : '';
+
     Get.dialog(
       AdoptAndSignModal(
-        initialName: 'Ricardo',
-        initialInitials: 'D.',
+        initialName: name,
+        initialInitials: initials,
         fieldType: field.type,
         onAdopt: (Uint8List? signature, name, initials) {
           _applySignature(field, signature);
